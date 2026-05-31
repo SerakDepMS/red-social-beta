@@ -329,30 +329,42 @@ body.noscroll {
 .hashtag{color:var(--green);cursor:pointer;font-weight:600;}
 .hashtag:hover{text-decoration:underline;}
 
-/* Contenedor multimedia: Flexbox para centrar */
+/* Contenedor multimedia: ancho completo y centrado con flexbox (corrección definitiva) */
 .p-media {
-  width: 100%;
+  width: 100% !important;
   background: var(--input-bg);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
   overflow: hidden;
-  padding: 0;
-  margin: 0;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
-/* Imagen, video o audio: centrado y adaptable */
+/* Imagen, video o audio: centrado y adaptable, anulando cualquier estilo inline */
 .p-media img,
 .p-media video,
 .p-media audio {
-  max-width: 100%;
-  height: auto;
-  display: block;
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
   border-radius: var(--r-md);
   flex-shrink: 0;
-  /* Elimina posibles conflictos de flotación */
-  float: none;
-  clear: both;
+  float: none !important;
+  clear: both !important;
+}
+
+/* Fuerza a que los elementos con estilo inline (si los hubiera) también se centren */
+.p-media img[style],
+.p-media video[style],
+.p-media audio[style] {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
 .p-rxn-row{display:flex;align-items:center;gap:3px;padding:7px 12px;border-top:1px solid var(--border);}
