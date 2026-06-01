@@ -705,9 +705,16 @@ body.noscroll {
 @media (min-width: 781px) {
   .btn-back-chat     { display: none !important; }
   .btn-back-settings { display: none !important; }
-  .mobile-menu-btn   { display: none !important; }
+  /* Ocultamos solo el botón hamburguesa IZQUIERDO (sidebar de navegación) */
+  .mobile-menu-btn:not(#mobile-right-toggle) { display: none !important; }
+  /* Mostramos el botón hamburguesa DERECHO (menú de usuario) */
+  #mobile-right-toggle {
+    display: inline-flex !important;
+  }
+  /* El backdrop del sidebar izquierdo no se usa en escritorio */
   .sidebar-backdrop  { display: none !important; }
-  .right-drawer      { display: none !important; }
+  /* El drawer derecho ahora se muestra (no se oculta con display:none) */
+  /* Eliminamos la línea .right-drawer { display: none; } para que funcione */
 
   .layout { grid-template-columns: var(--sidebar) 1fr; }
 
