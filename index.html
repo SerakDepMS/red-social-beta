@@ -956,6 +956,79 @@ body.noscroll {
   .left-sidebar.active { left: 0 !important; }
   .msg-layout { height: calc(100vh - var(--hh) - 30px); }
 }
+
+/* ══════════════════════════════════════════════════════
+   CANALES - NAVEGACIÓN MÓVIL (menú → detalle → atrás)
+   ══════════════════════════════════════════════════════ */
+@media (max-width: 780px) {
+  /* Contenedor principal: ocupa toda la altura como en mensajes */
+  .channels-layout {
+    display: block !important;
+    height: calc(100vh - var(--hh) - 24px) !important; /* Misma altura que msg-layout */
+    overflow: hidden !important;
+    position: relative !important;
+  }
+  /* Sidebar (lista): ocupa toda la altura, scroll si es necesario */
+  .ch-sidebar {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    position: relative !important;
+    background: var(--card) !important;
+    border-right: none !important;
+  }
+  /* Contenido del canal: ocupa toda la altura, oculto por defecto */
+  .ch-content {
+    display: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    flex-direction: column !important;
+    background: var(--card) !important;
+    position: relative !important;
+  }
+  /* Cuando se abre un canal, ocultar sidebar y mostrar contenido como flex columna */
+  .channels-layout.channels-open .ch-sidebar {
+    display: none !important;
+  }
+  .channels-layout.channels-open .ch-content {
+    display: flex !important;
+  }
+  /* Ajustes internos para que los mensajes ocupen el espacio restante */
+  .ch-content .ch-header {
+    flex-shrink: 0;
+    padding: 10px 12px;
+  }
+  .ch-content .ch-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+  }
+  .ch-content .ch-input-area {
+    flex-shrink: 0;
+    padding: 8px 12px;
+  }
+  /* Botón atrás */
+  .btn-back-channels {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--input-bg);
+    border: none;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 1rem;
+    flex-shrink: 0;
+    transition: background .15s;
+    margin-right: 8px;
+  }
+  .btn-back-channels:hover {
+    background: var(--hover);
+  }
+}
 </style>
 </head>
 <body>
@@ -1070,6 +1143,9 @@ body.noscroll {
           <div class="nav-item" data-view="messages" onclick="navigate('messages')"><span class="nicon"><i class="fas fa-comment-dots"></i></span>Mensajes<span class="nav-badge" id="msg-badge" style="display:none"></span></div>
           <div class="nav-item" data-view="saved" onclick="navigate('saved')"><span class="nicon"><i class="fas fa-bookmark"></i></span>Guardados</div>
           <div class="nav-item" data-view="scheduled" onclick="navigate('scheduled')"><span class="nicon"><i class="fas fa-clock"></i></span>Programados</div>
+          <div class="nav-item" data-view="channels" onclick="navigate('channels')"><span class="nicon"><i class="fas fa-hashtag"></i></span>Servidor<span class="tag tag-green" style="margin-left:auto;font-size:.6rem;">comunitario</span></div>
+          <div class="nav-item" data-view="watch" onclick="navigate('watch')"><span class="nicon"><i class="fas fa-tv"></i></span>Watch<span class="tag tag-purple" style="margin-left:auto;font-size:.6rem;">Video</span></div>
+          <div class="nav-item" data-view="friends" onclick="navigate('friends')"><span class="nicon"><i class="fas fa-user-friends"></i></span>Amigos</div>
           <div class="nav-item" data-view="settings" onclick="navigate('settings')"><span class="nicon"><i class="fas fa-gear"></i></span>Configuración</div>
           <div id="mod-nav-item" class="nav-item" data-view="moderation" onclick="navigate('moderation')" style="display:none;"><span class="nicon"><i class="fas fa-shield-halved"></i></span>Moderación<span class="nav-badge" id="mod-badge" style="display:none"></span></div>
         </div>
@@ -2180,6 +2256,9 @@ function navigate(view,param){
   else if(view==='profile')renderProfilePage(param);
   else if(view==='moderation')renderModerationPanel();
   else if(view==='scheduled')renderScheduledPostsPage();
+  else if(view==='channels')renderChannelsPage();
+  else if(view==='watch')renderWatchPage();
+  else if(view==='friends')renderFriendsPage();
 }
 
 // ═══════════════════════════════════════════
@@ -4772,5 +4851,1071 @@ window.addEventListener('resize',()=>{
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════
+     NEW FEATURES: Channels (Discord), Watch, Friends, Status, Voice Chat, Threads
+     ══════════════════════════════════════════════════════ -->
+
+<!-- Channels Create Modal -->
+<div class="modal" id="channel-create-modal">
+  <div class="mbox" style="max-width:440px;">
+    <div class="mhead"><h3><i class="fas fa-hashtag"></i> Crear canal</h3><button class="mclose" onclick="closeModal('channel-create-modal')"><i class="fas fa-times"></i></button></div>
+    <div class="mbody" style="display:flex;flex-direction:column;gap:10px;">
+      <input type="text" id="ch-name" placeholder="nombre-del-canal (sin espacios)" style="margin-bottom:0;">
+      <textarea id="ch-desc" placeholder="Descripción del canal..." style="resize:none;min-height:65px;margin-bottom:0;"></textarea>
+      <select id="ch-type" style="margin-bottom:0;">
+        <option value="text"># Canal de texto</option>
+        <option value="announce">📢 Canal de anuncios</option>
+        <option value="media">🖼️ Canal de media</option>
+      </select>
+      <select id="ch-access" style="margin-bottom:0;">
+        <option value="public">🌍 Público</option>
+        <option value="members">👥 Solo miembros</option>
+        <option value="mod">🛡️ Solo moderadores</option>
+      </select>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="createChannel()"><i class="fas fa-plus"></i> Crear canal</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Thread Modal -->
+<div class="modal" id="thread-modal">
+  <div class="mbox" style="max-width:560px;">
+    <div class="mhead"><h3><i class="fas fa-comments"></i> Hilo de conversación</h3><button class="mclose" onclick="closeModal('thread-modal')"><i class="fas fa-times"></i></button></div>
+    <div class="mbody" id="thread-modal-body"></div>
+  </div>
+</div>
+
+<!-- Status Modal -->
+<div class="modal" id="status-modal">
+  <div class="mbox" style="max-width:400px;">
+    <div class="mhead"><h3><i class="fas fa-circle-dot"></i> Mi estado</h3><button class="mclose" onclick="closeModal('status-modal')"><i class="fas fa-times"></i></button></div>
+    <div class="mbody" style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;gap:7px;flex-wrap:wrap;" id="status-presets">
+        <button class="btn btn-ghost" onclick="setUserStatus('🟢 En línea','online')">🟢 En línea</button>
+        <button class="btn btn-ghost" onclick="setUserStatus('🌙 No molestar','dnd')">🌙 No molestar</button>
+        <button class="btn btn-ghost" onclick="setUserStatus('💤 Ausente','away')">💤 Ausente</button>
+        <button class="btn btn-ghost" onclick="setUserStatus('🎮 Jugando','gaming')">🎮 Jugando</button>
+        <button class="btn btn-ghost" onclick="setUserStatus('🎵 Escuchando música','music')">🎵 Música</button>
+        <button class="btn btn-ghost" onclick="setUserStatus('📚 Estudiando','study')">📚 Estudiando</button>
+        <button class="btn btn-ghost" onclick="setUserStatus('💻 Trabajando','work')">💻 Trabajando</button>
+        <button class="btn btn-ghost" onclick="setUserStatus('','offline')">⚫ Invisible</button>
+      </div>
+      <div style="display:flex;gap:7px;">
+        <input type="text" id="custom-status-inp" placeholder="Estado personalizado..." style="flex:1;margin-bottom:0;" maxlength="60">
+        <button class="btn btn-primary" onclick="setCustomStatus()"><i class="fas fa-check"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Clip Trim Modal -->
+<div class="modal" id="clip-modal">
+  <div class="mbox" style="max-width:500px;">
+    <div class="mhead"><h3><i class="fas fa-scissors"></i> Crear clip</h3><button class="mclose" onclick="closeModal('clip-modal')"><i class="fas fa-times"></i></button></div>
+    <div class="mbody">
+      <p style="font-size:.85rem;color:var(--text2);margin-bottom:10px;">Recorta y comparte un momento de un Reel</p>
+      <div id="clip-modal-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Group Chat / Multi-DM Modal -->
+<div class="modal" id="group-chat-modal">
+  <div class="mbox" style="max-width:440px;">
+    <div class="mhead"><h3><i class="fas fa-comments"></i> Chat grupal</h3><button class="mclose" onclick="closeModal('group-chat-modal')"><i class="fas fa-times"></i></button></div>
+    <div class="mbody" style="display:flex;flex-direction:column;gap:10px;">
+      <input type="text" id="gc-name" placeholder="Nombre del grupo (ej: Squad 🔥)" style="margin-bottom:0;">
+      <div id="gc-members-list" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r-md);padding:8px;"></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="createGroupChat()"><i class="fas fa-plus"></i> Crear chat grupal</button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ══════════════ CHANNELS (Discord-like) ══════════════ */
+.channels-layout{display:grid;grid-template-columns:200px 1fr;gap:0;height:calc(100vh - var(--hh) - 36px);background:var(--card);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh2);}
+.ch-sidebar{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.ch-server-hd{padding:13px 14px;border-bottom:1px solid var(--border);font-family:var(--font-head);font-weight:800;font-size:.95rem;display:flex;align-items:center;justify-content:space-between;}
+.ch-list{flex:1;overflow-y:auto;padding:8px 0;}
+.ch-category{padding:4px 8px 2px;font-size:.68rem;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;cursor:pointer;display:flex;align-items:center;gap:4px;}
+.ch-item{display:flex;align-items:center;gap:7px;padding:5px 10px 5px 14px;border-radius:var(--r-sm);cursor:pointer;font-size:.84rem;font-weight:500;color:var(--text2);transition:.12s;margin:1px 6px;}
+.ch-item:hover{background:var(--hover);color:var(--text);}
+.ch-item.active{background:var(--green-l2);color:var(--green);font-weight:700;}
+.ch-item .ch-badge{margin-left:auto;background:var(--danger);color:#fff;border-radius:10px;padding:1px 5px;font-size:.6rem;font-weight:800;}
+.ch-content{display:flex;flex-direction:column;overflow:hidden;}
+.ch-header{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;flex-shrink:0;}
+.ch-header-name{font-family:var(--font-head);font-weight:800;font-size:.95rem;display:flex;align-items:center;gap:6px;}
+.ch-header-desc{font-size:.78rem;color:var(--text2);padding-left:3px;}
+.ch-messages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:2px;}
+.ch-msg{display:flex;gap:10px;padding:3px 6px;border-radius:var(--r-sm);transition:.1s;}
+.ch-msg:hover{background:var(--hover);}
+.ch-msg-av{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-top:1px;}
+.ch-msg-body{flex:1;min-width:0;}
+.ch-msg-meta{display:flex;align-items:baseline;gap:7px;margin-bottom:1px;}
+.ch-msg-author{font-weight:700;font-size:.85rem;}
+.ch-msg-time{font-size:.7rem;color:var(--text2);}
+.ch-msg-text{font-size:.88rem;line-height:1.45;word-break:break-word;}
+.ch-msg-continued{padding-left:46px;}
+.ch-msg-continued .ch-msg-av{display:none;}
+.ch-input-area{padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0;}
+.ch-input-row{display:flex;align-items:center;gap:8px;background:var(--input-bg);border-radius:var(--r-2xl);padding:6px 10px 6px 14px;}
+.ch-input-row input{background:none;border:none;flex:1;padding:5px 0;font-size:.88rem;}
+.ch-input-btns{display:flex;gap:4px;}
+.ch-member-bar{border-left:1px solid var(--border);width:200px;flex-shrink:0;overflow-y:auto;padding:12px 8px;}
+
+
+/* ══════════════ WATCH ══════════════ */
+.watch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+.watch-card{background:var(--card);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh1);cursor:pointer;transition:.18s;}
+.watch-card:hover{box-shadow:var(--sh2);transform:translateY(-2px);}
+.watch-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--input-bg);position:relative;display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:var(--text2);overflow:hidden;}
+.watch-thumb video{width:100%;height:100%;object-fit:cover;}
+.watch-thumb-overlay{position:absolute;inset:0;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;opacity:0;transition:.18s;}
+.watch-card:hover .watch-thumb-overlay{opacity:1;}
+.watch-thumb-play{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;color:#000;font-size:1.1rem;}
+.watch-info{padding:10px 12px;}
+.watch-title{font-family:var(--font-head);font-weight:700;font-size:.88rem;margin-bottom:3px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.watch-meta{font-size:.74rem;color:var(--text2);display:flex;align-items:center;gap:6px;}
+.watch-category-tabs{display:flex;gap:7px;overflow-x:auto;flex-wrap:nowrap;margin-bottom:14px;padding-bottom:3px;}
+.watch-player-wrap{background:#000;border-radius:var(--r-lg);overflow:hidden;margin-bottom:14px;}
+.watch-player-wrap video{width:100%;max-height:50vh;display:block;}
+
+/* ══════════════ FRIENDS ══════════════ */
+.friends-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.friend-card{background:var(--card);border-radius:var(--r-lg);padding:14px;box-shadow:var(--sh1);display:flex;align-items:center;gap:12px;margin-bottom:9px;}
+.friend-card-av{position:relative;flex-shrink:0;}
+.friend-card-av img{width:48px;height:48px;border-radius:50%;object-fit:cover;}
+.friend-status-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--card);position:absolute;bottom:1px;right:1px;}
+.friend-status-dot.online{background:#40916c;}
+.friend-status-dot.away{background:var(--orange);}
+.friend-status-dot.dnd{background:var(--danger);}
+.friend-status-dot.offline{background:#6b7280;}
+.friend-card-info{flex:1;min-width:0;}
+.friend-card-name{font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:5px;}
+.friend-card-status{font-size:.76rem;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.friend-card-acts{display:flex;gap:6px;flex-shrink:0;}
+
+
+
+/* ══════════════ STATUS INDICATOR ══════════════ */
+.user-status-text{font-size:.72rem;color:var(--text2);display:flex;align-items:center;gap:4px;margin-top:1px;}
+
+/* ══════════════ THREADS ══════════════ */
+.thread-item{display:flex;gap:9px;padding:8px 0;border-bottom:1px solid var(--border);}
+.thread-item:last-child{border-bottom:none;}
+.thread-item img{width:30px;height:30px;border-radius:50%;flex-shrink:0;object-fit:cover;}
+.thread-item-body{flex:1;}
+.thread-item-meta{font-size:.76rem;font-weight:700;margin-bottom:2px;}
+.thread-item-text{font-size:.84rem;line-height:1.4;}
+.thread-reply-input{display:flex;gap:7px;margin-top:10px;align-items:center;}
+
+/* ══════════════ GROUP CHAT UI ══════════════ */
+.gc-conv-row{display:flex;align-items:center;gap:9px;padding:7px 11px;border-radius:var(--r-md);cursor:pointer;transition:.13s;}
+.gc-conv-row:hover{background:var(--hover);}
+.gc-av-stack{position:relative;width:38px;height:38px;flex-shrink:0;}
+.gc-av-stack img:first-child{width:28px;height:28px;border-radius:50%;position:absolute;top:0;left:0;object-fit:cover;border:2px solid var(--card);}
+.gc-av-stack img:last-child{width:22px;height:22px;border-radius:50%;position:absolute;bottom:0;right:0;object-fit:cover;border:2px solid var(--card);}
+
+/* ══════════════ STORY REACTION / REPLY ══════════════ */
+.sv-reply-bar{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);display:flex;gap:7px;align-items:center;}
+.sv-reply-bar input{flex:1;background:rgba(255,255,255,.18);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,.35);color:#fff;border-radius:var(--r-2xl);padding:8px 14px;}
+.sv-reply-bar input::placeholder{color:rgba(255,255,255,.7);}
+.sv-rxn-btns{display:flex;gap:4px;justify-content:center;margin-bottom:8px;}
+.sv-rxn-btn{width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);cursor:pointer;font-size:1.1rem;transition:.15s;}
+.sv-rxn-btn:hover{background:rgba(255,255,255,.35);transform:scale(1.2);}
+
+/* ══════════════ POST BOOST / PROMOTE ══════════════ */
+.boost-ribbon{background:linear-gradient(90deg,#f59e0b,#fbbf24);color:#000;font-size:.67rem;font-weight:800;padding:2px 8px;border-radius:10px;display:inline-flex;align-items:center;gap:3px;}
+
+/* ══════════════ WATCH FULLSCREEN ══════════════ */
+#watch-fullscreen{position:fixed;inset:0;background:#000;z-index:9998;display:none;flex-direction:column;}
+#watch-fullscreen video{flex:1;width:100%;object-fit:contain;}
+#watch-fullscreen-bar{position:absolute;bottom:0;left:0;right:0;padding:14px;background:linear-gradient(transparent,rgba(0,0,0,.8));display:flex;align-items:center;gap:10px;color:#fff;}
+
+/* ══════════════ MENTION PILLS ══════════════ */
+.mention-pill{background:var(--green-l);color:var(--green);border-radius:4px;padding:0 4px;font-weight:700;cursor:pointer;}
+.mention-pill:hover{background:var(--green-l2);}
+
+/* ══════════════ CHANNEL MSG REACTIONS ══════════════ */
+.ch-msg-rxns{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;}
+.ch-rxn-btn{display:inline-flex;align-items:center;gap:3px;font-size:.76rem;background:var(--input-bg);border-radius:10px;padding:2px 7px;border:1.5px solid transparent;cursor:pointer;transition:.12s;}
+.ch-rxn-btn:hover,.ch-rxn-btn.mine{border-color:var(--green);background:var(--green-l);}
+.ch-add-rxn{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2px 8px;font-size:.88rem;cursor:pointer;box-shadow:var(--sh1);}
+.ch-msg:hover .ch-add-rxn{display:flex;gap:2px;}
+
+/* ══════════════ STATUS BAR ══════════════ */
+.pc-status-bar{display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--input-bg);border-radius:var(--r-sm);cursor:pointer;margin-top:7px;font-size:.76rem;}
+.pc-status-bar:hover{background:var(--hover);}
+
+/* ══════════════ FRIENDS PAGE ══════════════ */
+.friend-req-banner{background:var(--green-l);border-radius:var(--r-md);padding:10px 13px;display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:.84rem;}
+
+
+</style>
+
+<script>
+// ═══════════════════════════════════════════
+//  NEW FEATURES STATE
+// ═══════════════════════════════════════════
+let channels = [];
+let channelMessages = {};
+let activeChannelId = null;
+let userStatuses = {};
+let groupChats = [];
+let watchVideos = [];
+let idsCh = {nc:1, ngc:1, nwv:1};
+
+// Init from localStorage
+(function initNewState(){
+  try{
+    const s = localStorage.getItem('sms_newstate');
+    if(s){
+      const d = JSON.parse(s);
+      channels = d.channels||[];
+      channelMessages = d.channelMessages||{};
+      userStatuses = d.userStatuses||{};
+      groupChats = d.groupChats||[];
+      watchVideos = d.watchVideos||[];
+      idsCh = d.idsCh||{nc:1,ngc:1,nwv:1};
+    }
+  }catch(e){}
+  // seed demo channels if empty
+  if(!channels.length){
+    channels=[
+      {id:1,name:'general',type:'text',desc:'Canal principal de la comunidad',access:'public',createdBy:0,pinned:[],slowMode:0},
+      {id:2,name:'anuncios',type:'announce',desc:'Anuncios oficiales',access:'public',createdBy:0,pinned:[]},
+      {id:3,name:'media',type:'media',desc:'Comparte fotos y videos',access:'public',createdBy:0,pinned:[]},
+    ];
+    channelMessages={1:[],2:[],3:[]};
+    idsCh.nc=5;
+  }
+})();
+
+function saveNewState(){
+  try{
+    localStorage.setItem('sms_newstate',JSON.stringify({channels,channelMessages,userStatuses,groupChats,watchVideos,idsCh}));
+  }catch(e){}
+}
+
+// ═══════════════════════════════════════════
+//  USER STATUS
+// ═══════════════════════════════════════════
+function setUserStatus(label, type){
+  const ux = users.find(u=>u.id===CU.id);
+  if(ux){ ux.statusLabel=label; ux.statusType=type; CU.statusLabel=label; CU.statusType=type; }
+  userStatuses[CU.id]={label,type,ts:Date.now()};
+  saveNewState(); save();
+  closeModal('status-modal');
+  renderSidebar();
+  toast('Estado actualizado ✅','success');
+}
+function setCustomStatus(){
+  const v = document.getElementById('custom-status-inp')?.value.trim();
+  if(!v)return;
+  setUserStatus('✏️ '+v,'custom');
+}
+function getStatusDot(uid){
+  const s = userStatuses[uid]||{};
+  const t = s.type||'offline';
+  return `<span class="friend-status-dot ${t}" title="${s.label||''}"></span>`;
+}
+function getStatusLabel(uid){
+  const s = userStatuses[uid]||{};
+  return s.label||'';
+}
+
+// ═══════════════════════════════════════════
+//  CHANNELS (Discord-style)
+// ═══════════════════════════════════════════
+function renderChannelsPage(){
+  const mc = document.getElementById('content');
+  if(!activeChannelId && channels.length){ activeChannelId = channels.find(c=>c.type!=='voice')?.id || channels[0]?.id; }
+  const textChannels = channels.filter(c=>c.type!=='voice');
+  const isPriv = PRIVILEGED.includes(CU.role||'');
+
+  mc.innerHTML = `<div class="channels-layout" id="channels-layout">
+    <div class="ch-sidebar" id="ch-sidebar">
+      <div class="ch-server-hd">
+        <span>🌿 Serakdep</span>
+        ${isPriv?`<button class="btn-icon" style="width:28px;height:28px;font-size:.8rem;" onclick="openModal('channel-create-modal')" title="Crear canal"><i class="fas fa-plus"></i></button>`:''}
+      </div>
+      <div class="ch-list">
+        <div class="ch-category"><i class="fas fa-chevron-down" style="font-size:.6rem;"></i> CANALES DE TEXTO</div>
+        ${textChannels.map(ch=>`
+          <div class="ch-item ${ch.id===activeChannelId?'active':''}" onclick="switchChannel(${ch.id})">
+            <i class="fas ${ch.type==='announce'?'fa-bullhorn':ch.type==='media'?'fa-image':'fa-hashtag'}" style="font-size:.8rem;opacity:.7;width:14px;"></i>
+            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(ch.name)}</span>
+            ${(channelMessages[ch.id]||[]).filter(m=>!m.readBy?.includes(CU.id)&&m.from!==CU.id).length>0?`<span class="ch-badge">${(channelMessages[ch.id]||[]).filter(m=>!m.readBy?.includes(CU.id)&&m.from!==CU.id).length}</span>`:''}
+          </div>
+        `).join('')}
+      </div>
+      <div style="padding:10px 12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--bg);">
+        <img src="${CU.photo||defAv()}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(CU.username)}</div>
+          <div style="font-size:.68rem;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${getStatusLabel(CU.id)||'#'+CU.id}</div>
+        </div>
+        <button class="btn-icon" style="width:26px;height:26px;font-size:.75rem;" onclick="openModal('status-modal')" title="Cambiar estado"><i class="fas fa-circle-dot"></i></button>
+      </div>
+    </div>
+    <div class="ch-content" id="ch-content">
+      ${renderChannelContent(activeChannelId)}
+    </div>
+  </div>`;
+}
+function renderChannelContent(chId){
+  const ch = channels.find(c=>c.id===chId);
+  if(!ch) return `<div class="empty" style="margin:auto;"><i class="fas fa-hashtag"></i><p>Selecciona un canal</p></div>`;
+  const msgs = channelMessages[chId]||[];
+  const isPriv = PRIVILEGED.includes(CU.role||'');
+  // Mark as read
+  msgs.forEach(m=>{ m.readBy=m.readBy||[]; if(!m.readBy.includes(CU.id)) m.readBy.push(CU.id); });
+  saveNewState();
+
+  return `
+    <div class="ch-header">
+      <button class="mobile-menu-btn" style="display:none;" id="ch-menu-btn" onclick="document.getElementById('ch-sidebar').classList.toggle('ch-open')"><i class="fas fa-bars"></i></button>
+      <div class="ch-header-name"><i class="fas ${ch.type==='announce'?'fa-bullhorn':ch.type==='media'?'fa-image':'fa-hashtag'}" style="color:var(--text2);font-size:.9rem;"></i>${esc(ch.name)}</div>
+      <div class="ch-header-desc">${ch.desc?'· '+esc(ch.desc):''}</div>
+      <div style="margin-left:auto;display:flex;gap:6px;">
+        <button class="btn-icon" style="width:30px;height:30px;" onclick="showChannelMembers(${chId})" title="Miembros"><i class="fas fa-users"></i></button>
+        ${isPriv?`<button class="btn-icon" style="width:30px;height:30px;" onclick="editChannel(${chId})" title="Editar canal"><i class="fas fa-gear"></i></button>`:''}
+      </div>
+    </div>
+    <div class="ch-messages" id="ch-msgs-${chId}">
+      ${msgs.length?renderChannelMsgs(msgs,chId):
+        `<div class="empty" style="margin:auto;"><i class="fas fa-hashtag" style="font-size:2.5rem;"></i><p>¡Sé el primero en escribir en <strong>#${esc(ch.name)}</strong>!</p></div>`}
+    </div>
+    <div class="ch-input-area">
+      ${ch.type==='announce'&&!isPriv?
+        `<div style="text-align:center;color:var(--text2);font-size:.82rem;padding:8px;"><i class="fas fa-lock"></i> Solo moderadores pueden publicar aquí</div>`:
+        `<div style="margin-bottom:7px;" id="ch-reply-bar-${chId}" style="display:none;"></div>
+        <div class="ch-input-row">
+          <button class="btn-icon" style="width:28px;height:28px;flex-shrink:0;" onclick="triggerChFileUpload(${chId})" title="Adjuntar archivo"><i class="fas fa-paperclip"></i></button>
+          <input type="text" id="ch-inp-${chId}" placeholder="Mensaje en #${esc(ch.name)}..." onkeypress="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChannelMsg(${chId});}">
+          <div class="ch-input-btns">
+            <button class="btn-icon" style="width:28px;height:28px;" onclick="insertChEmoji(${chId})" title="Emoji"><i class="fas fa-face-smile"></i></button>
+            <button class="btn-icon" style="width:28px;height:28px;background:var(--green);color:#fff;" onclick="sendChannelMsg(${chId})"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+        <input type="file" id="ch-file-${chId}" style="display:none;" onchange="handleChFile(${chId},this)">`
+      }
+    </div>`;
+}
+
+function renderChannelMsgs(msgs, chId){
+  return msgs.map((m,i)=>{
+    const u = users.find(x=>x.id===m.from);
+    const prev = msgs[i-1];
+    const grouped = prev && prev.from===m.from && (m.ts-prev.ts)<300000;
+    const rxns = m.reactions||{};
+    const rxnHtml = Object.entries(rxns).length?`<div class="ch-msg-rxns">${Object.entries(rxns).map(([e,uids])=>`<button class="ch-rxn-btn ${uids.includes(CU.id)?'mine':''}" onclick="addChMsgRxn(${chId},${m.ts},'${e}')">${e} ${uids.length}</button>`).join('')}</div>`:'';
+    let mediaHtml='';
+    if(m.media){
+      if(m.media.type==='image') mediaHtml=`<img src="${m.media.data}" style="max-width:300px;max-height:220px;border-radius:var(--r-md);display:block;margin-top:4px;cursor:pointer;" onclick="openLB('${m.media.data}')">`;
+      else if(m.media.type==='video') mediaHtml=`<video src="${m.media.data}" controls style="max-width:300px;border-radius:var(--r-md);display:block;margin-top:4px;"></video>`;
+    }
+    const replyHtml = m.replyTo?(()=>{
+      const orig = msgs.find(x=>x.ts===m.replyTo);
+      return orig?`<div style="border-left:3px solid var(--green);padding:2px 8px;margin-bottom:3px;font-size:.76rem;color:var(--text2);border-radius:3px;background:var(--input-bg);cursor:pointer;" onclick="document.getElementById('ch-m-${chId}-${orig.ts}')?.scrollIntoView({behavior:'smooth'})"><b>${orig.from===CU.id?'Tú':users.find(u=>u.id===orig.from)?.username||'?'}</b>: ${esc((orig.text||'[media]').substring(0,60))}</div>`:'';
+    })():'';
+    return `<div class="ch-msg ${grouped?'ch-msg-continued':''}" id="ch-m-${chId}-${m.ts}" style="position:relative;">
+      ${grouped?'':`<img src="${u?.photo||defAv()}" class="ch-msg-av" alt="" loading="lazy">`}
+      <div class="ch-msg-body">
+        ${grouped?'':`<div class="ch-msg-meta"><span class="ch-msg-author" style="color:${roleColor(u?.role||'')}">${esc(u?.username||'Desconocido')}</span><span class="ch-msg-time">${timeAgo(m.ts)}</span>${m.pinned?'<span class="tag tag-orange" style="font-size:.6rem;">📌</span>':''}</div>`}
+        ${replyHtml}
+        ${m.text?`<div class="ch-msg-text">${renderHashtags(esc(m.text))}</div>`:''}
+        ${mediaHtml}
+        ${rxnHtml}
+      </div>
+      <div class="ch-add-rxn">
+        ${['❤️','👍','😂','🔥','😮'].map(e=>`<span onclick="addChMsgRxn(${chId},${m.ts},'${e}')" style="cursor:pointer;">${e}</span>`).join('')}
+        <span onclick="startChReply(${chId},${m.ts},'${esc((m.text||'').substring(0,40))}')" style="cursor:pointer;font-size:.8rem;color:var(--text2);" title="Responder">↩</span>
+        ${m.from===CU.id||PRIVILEGED.includes(CU.role||'')?`<span onclick="deleteChMsg(${chId},${m.ts})" style="cursor:pointer;font-size:.8rem;color:var(--danger);" title="Eliminar">🗑</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function roleColor(role){
+  const m={Fundador:'#7c3aed',Líder:'#d97706','Soporte Técnico':'#b45309',Admin:'#dc2626'};
+  return m[role]||'var(--text)';
+}
+
+function switchChannel(id){
+  activeChannelId=id;
+  const content = document.getElementById('ch-content');
+  if(content){ content.innerHTML=renderChannelContent(id); scrollChBottom(id); }
+  document.querySelectorAll('.ch-item').forEach(el=>{
+    el.classList.toggle('active', el.getAttribute('onclick')===`switchChannel(${id})`);
+  });
+  
+  // --- Mobile navigation logic ---
+  const layout = document.getElementById('channels-layout');
+  const isMobile = window.innerWidth <= 780;
+  if(isMobile && layout) {
+      layout.classList.add('channels-open');
+      
+      // Inject back button if not already present
+      const chHeader = document.querySelector('.ch-header');
+      if(chHeader && !document.getElementById('ch-back-btn')) {
+          const backBtn = document.createElement('button');
+          backBtn.id = 'ch-back-btn';
+          backBtn.className = 'btn-back-channels';
+          backBtn.innerHTML = '<i class="fas fa-arrow-left"></i>';
+          backBtn.onclick = backToChannelsList;
+          // Insert at the beginning of ch-header
+          chHeader.insertBefore(backBtn, chHeader.firstChild);
+      }
+  }
+  // --- End mobile navigation logic ---
+  
+  // Re-render sidebar to update active class and badges
+  const sidebar = document.getElementById('ch-sidebar');
+  if(sidebar){ 
+    const isPriv = PRIVILEGED.includes(CU.role||'');
+    const textChannels = channels.filter(c=>c.type!=='voice');
+    const newHtml = `<div class="ch-server-hd"><span>🌿 Serakdep</span>${isPriv?`<button class="btn-icon" style="width:28px;height:28px;font-size:.8rem;" onclick="openModal('channel-create-modal')"><i class="fas fa-plus"></i></button>`:''}</div>
+    <div class="ch-list">
+      <div class="ch-category"><i class="fas fa-chevron-down" style="font-size:.6rem;"></i> CANALES DE TEXTO</div>
+      ${textChannels.map(ch=>`<div class="ch-item ${ch.id===id?'active':''}" onclick="switchChannel(${ch.id})"><i class="fas ${ch.type==='announce'?'fa-bullhorn':ch.type==='media'?'fa-image':'fa-hashtag'}" style="font-size:.8rem;opacity:.7;width:14px;"></i><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(ch.name)}</span></div>`).join('')}
+    </div>
+    <div style="padding:10px 12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--bg);">
+      <img src="${CU.photo||defAv()}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+      <div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:.8rem;">${esc(CU.username)}</div><div style="font-size:.68rem;color:var(--text2);">${getStatusLabel(CU.id)||'#'+CU.id}</div></div>
+      <button class="btn-icon" style="width:26px;height:26px;font-size:.75rem;" onclick="openModal('status-modal')"><i class="fas fa-circle-dot"></i></button>
+    </div>`;
+    sidebar.innerHTML = newHtml;
+  }
+}
+
+function backToChannelsList() {
+    const layout = document.getElementById('channels-layout');
+    if(layout) {
+        layout.classList.remove('channels-open');
+    }
+    // Remove back button
+    const backBtn = document.getElementById('ch-back-btn');
+    if(backBtn) backBtn.remove();
+}
+
+function sendChannelMsg(chId){
+  const inp = document.getElementById(`ch-inp-${chId}`);
+  const hasText = inp&&inp.value.trim();
+  if(!hasText&&!_chPendingMedia) return;
+  if(!channelMessages[chId]) channelMessages[chId]=[];
+  const replyEl = document.getElementById(`ch-reply-bar-${chId}`);
+  const replyTo = replyEl?._replyTo||null;
+  const msg = {from:CU.id, text:inp?inp.value.trim():'', ts:Date.now(), reactions:{}, readBy:[CU.id], replyTo};
+  if(_chPendingMedia) msg.media=_chPendingMedia;
+  channelMessages[chId].push(msg);
+  if(inp) inp.value='';
+  _chPendingMedia=null;
+  if(replyEl){replyEl.innerHTML='';replyEl._replyTo=null;}
+  saveNewState();
+  const msgsEl = document.getElementById(`ch-msgs-${chId}`);
+  if(msgsEl){ msgsEl.innerHTML=renderChannelMsgs(channelMessages[chId],chId); scrollChBottom(chId); }
+  // notify other members (simulate)
+  toast('','');// silent
+}
+
+let _chPendingMedia=null;
+function triggerChFileUpload(chId){ document.getElementById(`ch-file-${chId}`)?.click(); }
+function handleChFile(chId, input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const type=file.type.startsWith('video')?'video':file.type.startsWith('audio')?'audio':'image';
+    _chPendingMedia={data:e.target.result,type,name:file.name};
+    toast(`📎 Archivo listo para enviar: ${file.name}`,'info');
+  };
+  reader.readAsDataURL(file);
+}
+
+function insertChEmoji(chId){
+  const emojis=['😀','😂','❤️','👍','🔥','😮','🎉','👏','😢','😡','🤔','💯','✅','⭐','🚀','🎵'];
+  const inp=document.getElementById(`ch-inp-${chId}`);
+  if(!inp)return;
+  const pick=emojis[Math.floor(Math.random()*emojis.length)];
+  inp.value+=pick;inp.focus();
+}
+
+function addChMsgRxn(chId, ts, emoji){
+  const msgs = channelMessages[chId]||[];
+  const m = msgs.find(x=>x.ts===ts);
+  if(!m) return;
+  m.reactions=m.reactions||{};
+  m.reactions[emoji]=m.reactions[emoji]||[];
+  if(m.reactions[emoji].includes(CU.id)) m.reactions[emoji]=m.reactions[emoji].filter(x=>x!==CU.id);
+  else m.reactions[emoji].push(CU.id);
+  if(!m.reactions[emoji].length) delete m.reactions[emoji];
+  saveNewState();
+  const msgsEl=document.getElementById(`ch-msgs-${chId}`);
+  if(msgsEl){ msgsEl.innerHTML=renderChannelMsgs(msgs,chId); }
+}
+
+function startChReply(chId, ts, preview){
+  const bar = document.getElementById(`ch-reply-bar-${chId}`);
+  if(!bar) return;
+  bar._replyTo = ts;
+  bar.style.display='flex';
+  bar.innerHTML=`<div style="flex:1;font-size:.78rem;color:var(--text2);background:var(--input-bg);border-radius:var(--r-sm);padding:4px 9px;border-left:3px solid var(--green);">Respondiendo: ${esc(preview)}</div><button class="btn-icon" style="width:24px;height:24px;flex-shrink:0;" onclick="this.parentElement.innerHTML='';this.parentElement._replyTo=null;"><i class="fas fa-times"></i></button>`;
+  document.getElementById(`ch-inp-${chId}`)?.focus();
+}
+
+function deleteChMsg(chId, ts){
+  channelMessages[chId]=(channelMessages[chId]||[]).filter(m=>m.ts!==ts);
+  saveNewState();
+  const msgsEl=document.getElementById(`ch-msgs-${chId}`);
+  if(msgsEl) msgsEl.innerHTML=renderChannelMsgs(channelMessages[chId]||[],chId);
+}
+
+function scrollChBottom(chId){
+  const el=document.getElementById(`ch-msgs-${chId}`);
+  if(el) el.scrollTop=el.scrollHeight;
+}
+
+function createChannel(){
+  const name=document.getElementById('ch-name')?.value.trim().toLowerCase().replace(/\s+/g,'-');
+  const desc=document.getElementById('ch-desc')?.value.trim();
+  const type=document.getElementById('ch-type')?.value||'text';
+  const access=document.getElementById('ch-access')?.value||'public';
+  if(!name){toast('Escribe un nombre para el canal','warning');return;}
+  if(channels.find(c=>c.name===name)){toast('Ya existe un canal con ese nombre','warning');return;}
+  const ch={id:idsCh.nc++,name,desc,type,access,createdBy:CU.id,pinned:[]};
+  channels.push(ch);
+  channelMessages[ch.id]=[];
+  closeModal('channel-create-modal');
+  saveNewState();
+  toast(`Canal #${name} creado ✅`,'success');
+  activeChannelId=ch.id;
+  renderChannelsPage();
+}
+
+function editChannel(chId){
+  const ch=channels.find(c=>c.id===chId);if(!ch)return;
+  const newName=prompt('Nuevo nombre del canal:',ch.name);
+  if(!newName||!newName.trim())return;
+  ch.name=newName.trim().toLowerCase().replace(/\s+/g,'-');
+  const newDesc=prompt('Nueva descripción:',ch.desc||'');
+  if(newDesc!==null)ch.desc=newDesc;
+  saveNewState();
+  renderChannelsPage();
+  toast('Canal actualizado ✅','success');
+}
+
+function showChannelMembers(chId){
+  toast(`${users.length} miembros en #${channels.find(c=>c.id===chId)?.name||''}`, 'info');
+}
+
+
+
+// ═══════════════════════════════════════════
+//  WATCH (Facebook/TikTok-style video feed)
+// ═══════════════════════════════════════════
+function renderWatchPage(){
+  const mc=document.getElementById('content');
+  // Combine reels + watch videos
+  const allVideos=[
+    ...reels.filter(r=>r.media).map(r=>({...r,source:'reel',thumbSrc:r.media})),
+    ...watchVideos.map(v=>({...v,source:'watch'}))
+  ].sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+
+  const categories=['Para ti','Siguiendo','Tendencias','Música','Juegos','Noticias','Deportes'];
+  let activeCat=mc._watchCat||'Para ti';
+
+  mc.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3 style="font-family:var(--font-head);font-weight:800;"><i class="fas fa-tv" style="color:var(--purple);margin-right:7px;"></i>Watch</h3>
+      <button class="btn btn-primary" onclick="openUploadWatchVideo()"><i class="fas fa-plus"></i> Subir video</button>
+    </div>
+    <div class="watch-category-tabs">
+      ${categories.map(c=>`<button class="tab-pill ${c===activeCat?'active':''}" onclick="switchWatchCat('${c}')">${c}</button>`).join('')}
+    </div>
+    <div id="watch-featured" style="margin-bottom:18px;"></div>
+    <div class="watch-grid" id="watch-grid">
+      ${allVideos.length?allVideos.map(v=>watchCard(v)).join(''):`<div class="card" style="grid-column:1/-1;">${empty('fas fa-tv','¡Sube el primer video!')}</div>`}
+    </div>`;
+}
+
+function watchCard(v){
+  const u=users.find(x=>x.id===v.userId);
+  const liked=(v.likes||[]).includes(CU.id);
+  return `<div class="watch-card" onclick="openWatchPlayer(${v.id},'${v.source||'reel'}')">
+    <div class="watch-thumb">
+      ${v.media?`<video src="${v.media}" muted preload="none" style="pointer-events:none;"></video>`:`<i class="fas fa-play-circle"></i>`}
+      <div class="watch-thumb-overlay"><div class="watch-thumb-play"><i class="fas fa-play"></i></div></div>
+    </div>
+    <div class="watch-info">
+      <div class="watch-title">${esc(v.description||v.title||'Sin título')}</div>
+      <div class="watch-meta">
+        <img src="${u?.photo||defAv()}" style="width:18px;height:18px;border-radius:50%;object-fit:cover;" alt="" loading="lazy">
+        <span>${esc(u?.username||'')}</span>
+        <span>· ${timeAgo(v.timestamp)}</span>
+        <span>· <i class="fas fa-heart" style="color:${liked?'var(--danger)':'inherit'};"></i> ${(v.likes||[]).length}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function openWatchPlayer(id, source){
+  const v = source==='reel'?reels.find(x=>x.id===id):watchVideos.find(x=>x.id===id);
+  if(!v) return;
+  const mc=document.getElementById('content');
+  if(!mc) return;
+  const u=users.find(x=>x.id===v.userId);
+  const liked=(v.likes||[]).includes(CU.id);
+  const top=mc.querySelector('.watch-player-wrap');
+  const featureEl=document.getElementById('watch-featured')||mc;
+  const playerHtml=`
+    <div class="watch-player-wrap" id="active-watch-player">
+      ${v.media?`<video src="${v.media}" controls autoplay style="width:100%;max-height:55vh;background:#000;display:block;"></video>`:`<div style="background:#111;height:300px;display:flex;align-items:center;justify-content:center;color:#fff;"><i class="fas fa-film" style="font-size:3rem;opacity:.4;"></i></div>`}
+    </div>
+    <div class="card" style="padding:14px;margin-bottom:14px;">
+      <h3 style="font-family:var(--font-head);font-weight:800;margin-bottom:6px;">${esc(v.description||v.title||'Sin título')}</h3>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="openProfileModal(${v.userId})">
+          <img src="${u?.photo||defAv()}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="" loading="lazy">
+          <div>
+            <div style="font-weight:700;font-size:.9rem;">${esc(u?.username||'')}</div>
+            <div style="font-size:.73rem;color:var(--text2);">${(u?.followers||[]).length} seguidores</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="margin-left:auto;" onclick="toggleFollow(${v.userId})">${CU.following.includes(v.userId)?'Siguiendo':'Seguir'}</button>
+      </div>
+      <hr class="div">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-ghost" onclick="likeWatchVideo(${id},'${source}')" style="gap:6px;${liked?'color:var(--danger);':''}"><i class="fas fa-heart"></i> ${(v.likes||[]).length} Me gusta</button>
+        <button class="btn btn-ghost" onclick="shareWatchVideo(${id})"><i class="fas fa-share"></i> Compartir</button>
+        <button class="btn btn-ghost" onclick="openClipModal(${id},'${source}')"><i class="fas fa-scissors"></i> Crear clip</button>
+      </div>
+    </div>`;
+  const existing=document.getElementById('active-watch-player');
+  if(existing){ existing.closest('.watch-player-wrap')?.parentElement?.remove(); }
+  document.getElementById('watch-featured').innerHTML=playerHtml;
+  document.getElementById('watch-featured').scrollIntoView({behavior:'smooth'});
+}
+
+function likeWatchVideo(id, source){
+  const v = source==='reel'?reels.find(x=>x.id===id):watchVideos.find(x=>x.id===id);
+  if(!v) return;
+  v.likes=v.likes||[];
+  if(v.likes.includes(CU.id)) v.likes=v.likes.filter(x=>x!==CU.id);
+  else v.likes.push(CU.id);
+  save(); saveNewState();
+  openWatchPlayer(id,source);
+}
+
+function shareWatchVideo(id){ toast('🔗 Enlace copiado (simulado)','success'); }
+
+function openClipModal(id,source){
+  document.getElementById('clip-modal-body').innerHTML=`
+    <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:0;">
+        <label style="font-size:.8rem;color:var(--text2);display:block;margin-bottom:3px;">Inicio (segundos)</label>
+        <input type="number" id="clip-start" value="0" min="0" style="margin-bottom:0;">
+      </div>
+      <div style="flex:1;min-width:0;">
+        <label style="font-size:.8rem;color:var(--text2);display:block;margin-bottom:3px;">Duración (seg, máx 60)</label>
+        <input type="number" id="clip-dur" value="15" min="1" max="60" style="margin-bottom:0;">
+      </div>
+    </div>
+    <input type="text" id="clip-title" placeholder="Título del clip..." style="margin-bottom:10px;">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="publishClip(${id},'${source}')"><i class="fas fa-cut"></i> Publicar clip</button>`;
+  openModal('clip-modal');
+}
+
+function publishClip(id, source){
+  const title=document.getElementById('clip-title')?.value.trim()||'Clip sin título';
+  closeModal('clip-modal');
+  toast(`🎬 Clip "${title}" publicado en el feed ✅`,'success');
+}
+
+function openUploadWatchVideo(){
+  const input=document.createElement('input');
+  input.type='file';input.accept='video/*';
+  input.onchange=()=>{
+    const file=input.files[0];if(!file)return;
+    const title=prompt('Título del video:','');if(title===null)return;
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const v={id:idsCh.nwv++,userId:CU.id,title:title||file.name,description:title||'',media:e.target.result,likes:[],timestamp:Date.now()};
+      watchVideos.push(v);saveNewState();
+      renderWatchPage();toast('Video subido ✅','success');
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+function switchWatchCat(cat){
+  const mc=document.getElementById('content');
+  if(!mc)return;
+  mc._watchCat=cat;
+  renderWatchPage();
+}
+
+// ═══════════════════════════════════════════
+//  FRIENDS PAGE
+// ═══════════════════════════════════════════
+function renderFriendsPage(){
+  const mc=document.getElementById('content');
+  const bl=CU.blocked||[];
+  const mutualFriends=users.filter(u=>u.id!==CU.id&&!bl.includes(u.id)&&!u.deactivated&&CU.following.includes(u.id)&&(u.followers||[]).includes(CU.id));
+  const following=users.filter(u=>u.id!==CU.id&&!bl.includes(u.id)&&!u.deactivated&&CU.following.includes(u.id)&&!(u.followers||[]).includes(CU.id));
+  const followers=users.filter(u=>u.id!==CU.id&&!bl.includes(u.id)&&!u.deactivated&&!CU.following.includes(u.id)&&(u.followers||[]).includes(CU.id));
+  const suggestions=users.filter(u=>u.id!==CU.id&&!bl.includes(u.id)&&!u.deactivated&&!CU.following.includes(u.id)).slice(0,8);
+
+  mc.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3 style="font-family:var(--font-head);font-weight:800;"><i class="fas fa-user-friends" style="color:var(--blue);margin-right:7px;"></i>Amigos</h3>
+    </div>
+    <div class="friends-tabs">
+      <button class="tab-pill active" id="ft-mutual" onclick="switchFriendsTab('mutual')">Amigos (${mutualFriends.length})</button>
+      <button class="tab-pill" id="ft-following" onclick="switchFriendsTab('following')">Siguiendo (${following.length})</button>
+      <button class="tab-pill" id="ft-followers" onclick="switchFriendsTab('followers')">Seguidores (${followers.length})</button>
+      <button class="tab-pill" id="ft-suggestions" onclick="switchFriendsTab('suggestions')">Sugerencias</button>
+    </div>
+    <div id="friends-content">
+      ${mutualFriends.length?mutualFriends.map(u=>friendCard(u)).join(''):`<div class="card">${empty('fas fa-user-friends','No tienes amigos mutuos aún. ¡Sigue a alguien!')}</div>`}
+    </div>`;
+}
+
+function friendCard(u, type='mutual'){
+  const sl=getStatusLabel(u.id);
+  const st=userStatuses[u.id]?.type||'offline';
+  return `<div class="friend-card">
+    <div class="friend-card-av">
+      <img src="${u.photo||defAv()}" alt="" loading="lazy">
+      <span class="friend-status-dot ${st}"></span>
+    </div>
+    <div class="friend-card-info">
+      <div class="friend-card-name">${esc(u.username)} ${badgesHtml(u.id)}</div>
+      <div class="friend-card-status">${sl||esc(u.bio?.substring(0,50)||u.role||'Miembro')}</div>
+    </div>
+    <div class="friend-card-acts">
+      <button class="btn btn-ghost" style="padding:6px 11px;font-size:.78rem;" onclick="navigate('messages');setTimeout(()=>openChat(${u.id}),300)"><i class="fas fa-comment"></i></button>
+      <button class="btn btn-ghost" style="padding:6px 11px;font-size:.78rem;" onclick="openProfileModal(${u.id})"><i class="fas fa-user"></i></button>
+      ${type==='mutual'?`<button class="btn btn-danger" style="padding:6px 10px;font-size:.75rem;" onclick="toggleFollow(${u.id});renderFriendsPage()"><i class="fas fa-user-minus"></i></button>`:''}
+      ${type==='followers'?`<button class="btn btn-primary" style="padding:6px 11px;font-size:.78rem;" onclick="toggleFollow(${u.id});renderFriendsPage()">Seguir</button>`:''}
+      ${type==='suggestions'?`<button class="btn btn-primary" style="padding:6px 11px;font-size:.78rem;" onclick="toggleFollow(${u.id});renderFriendsPage()"><i class="fas fa-user-plus"></i> Seguir</button>`:''}
+    </div>
+  </div>`;
+}
+
+function switchFriendsTab(tab){
+  document.querySelectorAll('.friends-tabs .tab-pill').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`ft-${tab}`)?.classList.add('active');
+  const bl=CU.blocked||[];
+  const fc=document.getElementById('friends-content');if(!fc)return;
+  if(tab==='mutual'){
+    const arr=users.filter(u=>u.id!==CU.id&&!bl.includes(u.id)&&!u.deactivated&&CU.following.includes(u.id)&&(u.followers||[]).includes(CU.id));
+    fc.innerHTML=arr.length?arr.map(u=>friendCard(u,'mutual')).join(''):`<div class="card">${empty('fas fa-user-friends','Sin amigos mutuos aún.')}</div>`;
+  }else if(tab==='following'){
+    const arr=users.filter(u=>u.id!==CU.id&&!bl.includes(u.id)&&!u.deactivated&&CU.following.includes(u.id)&&!(u.followers||[]).includes(CU.id));
+    fc.innerHTML=arr.length?arr.map(u=>friendCard(u,'following')).join(''):`<div class="card">${empty('fas fa-arrow-up','No sigues a nadie que no te siga.')}</div>`;
+  }else if(tab==='followers'){
+    const arr=users.filter(u=>u.id!==CU.id&&!bl.includes(u.id)&&!u.deactivated&&!CU.following.includes(u.id)&&(u.followers||[]).includes(CU.id));
+    fc.innerHTML=arr.length?arr.map(u=>friendCard(u,'followers')).join(''):`<div class="card">${empty('fas fa-arrow-down','Nadie nuevo te sigue.')}</div>`;
+  }else{
+    const arr=users.filter(u=>u.id!==CU.id&&!bl.includes(u.id)&&!u.deactivated&&!CU.following.includes(u.id)).slice(0,12);
+    fc.innerHTML=arr.length?`<p style="font-size:.82rem;color:var(--text2);margin-bottom:9px;">Personas que quizás conozcas</p>${arr.map(u=>friendCard(u,'suggestions')).join('')}`:`<div class="card">${empty('fas fa-users','Sin sugerencias disponibles.')}</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════
+//  GROUP CHAT (Multi-DM like WhatsApp)
+// ═══════════════════════════════════════════
+function openGroupChatCreator(){
+  const mc=document.getElementById('gc-members-list');
+  if(!mc) return;
+  const bl=CU.blocked||[];
+  const others=users.filter(u=>u.id!==CU.id&&!bl.includes(u.id)&&!u.deactivated);
+  mc.innerHTML=others.map(u=>`
+    <label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;">
+      <input type="checkbox" class="gc-member-chk" value="${u.id}" style="width:auto;margin:0;">
+      <img src="${u.photo||defAv()}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;" alt="" loading="lazy">
+      <span style="font-size:.84rem;font-weight:500;">${esc(u.username)}</span>
+    </label>
+  `).join('');
+  openModal('group-chat-modal');
+}
+function createGroupChat(){
+  const name=document.getElementById('gc-name')?.value.trim();
+  if(!name){toast('Escribe un nombre para el grupo','warning');return;}
+  const selected=Array.from(document.querySelectorAll('.gc-member-chk:checked')).map(c=>parseInt(c.value));
+  if(!selected.length){toast('Selecciona al menos un miembro','warning');return;}
+  const gc={id:idsCh.ngc++,name,members:[CU.id,...selected],createdBy:CU.id,messages:[],timestamp:Date.now()};
+  groupChats.push(gc);
+  saveNewState();
+  closeModal('group-chat-modal');
+  toast(`Grupo "${name}" creado ✅`,'success');
+  // Navigate to messages and open group chat
+  navigate('messages');
+}
+
+// ═══════════════════════════════════════════
+//  TRENDING HASHTAGS (sidebar)
+// ═══════════════════════════════════════════
+function renderTrendingHashtags(){
+  const c=document.getElementById('trending-hashtags');if(!c)return;
+  const tagMap={};
+  posts.forEach(p=>{
+    const tags=p.content.match(/#[a-zA-ZÀ-ÿ0-9_]+/g)||[];
+    tags.forEach(t=>{tagMap[t]=(tagMap[t]||0)+1;});
+  });
+  const sorted=Object.entries(tagMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  c.innerHTML=sorted.length?sorted.map(([tag,count])=>`
+    <div class="list-row" onclick="searchTag('${esc(tag)}')">
+      <span class="gicon" style="font-size:.8rem;">#</span>
+      <div><div class="lname">${esc(tag)}</div><div class="lsub">${count} post${count!==1?'s':''}</div></div>
+    </div>`).join(''):`<p style="padding:8px 11px;font-size:.8rem;color:var(--text2);">Sin hashtags aún</p>`;
+}
+
+// Patch renderSidebar to include status and trending
+const _origRenderSidebar=renderSidebar;
+renderSidebar=function(){
+  _origRenderSidebar();
+  // Status indicator
+  const pcCard=document.getElementById('pc-card');
+  if(pcCard&&CU){
+    const statusBar=document.createElement('div');
+    statusBar.className='pc-status-bar';
+    statusBar.onclick=()=>openModal('status-modal');
+    const sl=getStatusLabel(CU.id)||'Establecer estado...';
+    const st=userStatuses[CU.id]?.type||'offline';
+    statusBar.innerHTML=`<span class="friend-status-dot ${st}" style="position:static;transform:none;flex-shrink:0;"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;">${esc(sl)}</span><i class="fas fa-chevron-right" style="font-size:.68rem;opacity:.4;"></i>`;
+    const pcBody=pcCard.querySelector('.pc-body');
+    if(pcBody) pcBody.appendChild(statusBar);
+  }
+  renderTrendingHashtags();
+};
+
+// ═══════════════════════════════════════════
+//  PATCH: Add Group Chat button to messages view
+// ═══════════════════════════════════════════
+const _origRenderMessages = typeof renderMessages==='function'?renderMessages:null;
+if(_origRenderMessages){
+  renderMessages=function(){
+    _origRenderMessages();
+    // Add group chat button to convs panel header
+    setTimeout(()=>{
+      const convHd=document.querySelector('.convs-panel .card-h');
+      if(convHd&&!document.getElementById('gc-create-btn')){
+        const btn=document.createElement('button');
+        btn.id='gc-create-btn';
+        btn.className='btn-icon';
+        btn.title='Nuevo chat grupal';
+        btn.style.cssText='width:30px;height:30px;font-size:.8rem;';
+        btn.innerHTML='<i class="fas fa-users-rectangle"></i>';
+        btn.onclick=openGroupChatCreator;
+        convHd.appendChild(btn);
+      }
+      // Show group chats in convs list
+      const convsList=document.getElementById('convs-list');
+      if(convsList&&groupChats.length){
+        const myGCs=groupChats.filter(gc=>gc.members.includes(CU.id));
+        if(myGCs.length){
+          const div=document.createElement('div');
+          div.innerHTML=`<p style="padding:3px 11px;font-size:.72rem;font-weight:800;color:var(--text2);">CHATS GRUPALES</p>`+
+            myGCs.map(gc=>{
+              const members=gc.members.map(id=>users.find(u=>u.id===id)).filter(Boolean);
+              const last=gc.messages[gc.messages.length-1];
+              return `<div class="gc-conv-row" onclick="openGroupChatView(${gc.id})">
+                <div class="gc-av-stack">
+                  <img src="${members[0]?.photo||defAv()}" alt="" loading="lazy">
+                  ${members[1]?`<img src="${members[1].photo||defAv()}" alt="" loading="lazy">`:''}
+                </div>
+                <div><div class="conv-name">${esc(gc.name)}</div><div class="conv-prev">${last?esc((last.text||'[media]').substring(0,40)):'Chat grupal · '+gc.members.length+' miembros'}</div></div>
+              </div>`;
+            }).join('');
+          convsList.prepend(div);
+        }
+      }
+    },100);
+  };
+}
+
+function openGroupChatView(gcId){
+  const gc=groupChats.find(x=>x.id===gcId);if(!gc)return;
+  const chatPanel=document.querySelector('.chat-panel');
+  if(!chatPanel)return;
+  const members=gc.members.map(id=>users.find(u=>u.id===id)).filter(Boolean);
+  chatPanel.innerHTML=`
+    <div class="chat-hd">
+      <div style="display:flex;align-items:center;gap:8px;flex:1;">
+        <div class="gc-av-stack" style="width:38px;height:38px;">
+          <img src="${members[0]?.photo||defAv()}" alt="" loading="lazy">
+          ${members[1]?`<img src="${members[1]?.photo||defAv()}" alt="" loading="lazy">`:''}
+        </div>
+        <div><div style="font-weight:700;font-size:.92rem;">${esc(gc.name)}</div><div style="font-size:.72rem;color:var(--text2);">${gc.members.length} miembros</div></div>
+      </div>
+      <button class="btn-icon" onclick="toast('Miembros: '+${JSON.stringify(members.map(u=>u.username).join(', '))},'info')" title="Ver miembros"><i class="fas fa-users"></i></button>
+    </div>
+    <div class="chat-area" id="gc-area-${gcId}">
+      ${gc.messages.map(m=>{
+        const u=users.find(x=>x.id===m.from);
+        const isMine=m.from===CU.id;
+        return `<div class="bubble ${isMine?'mine':'theirs'}">
+          ${!isMine?`<div style="font-size:.7rem;font-weight:700;color:var(--green);margin-bottom:2px;">${esc(u?.username||'')}</div>`:''}
+          ${m.text?esc(m.text):''}
+          <div class="btime">${timeAgo(m.ts||m.timestamp)}</div>
+        </div>`;
+      }).join('')||'<div class="empty"><i class="fas fa-comments"></i><p>¡Empieza la conversación!</p></div>'}
+    </div>
+    <div class="chat-input">
+      <input type="text" id="gc-inp-${gcId}" placeholder="Mensaje en ${esc(gc.name)}..." onkeypress="if(event.key==='Enter')sendGroupChatMsg(${gcId})">
+      <button class="btn-icon" style="background:var(--green);color:#fff;" onclick="sendGroupChatMsg(${gcId})"><i class="fas fa-paper-plane"></i></button>
+    </div>`;
+  if(window.innerWidth<=780){
+    document.getElementById('msg-layout')?.classList.add('chat-open');
+  }
+  const area=document.getElementById(`gc-area-${gcId}`);
+  if(area) area.scrollTop=area.scrollHeight;
+}
+
+function sendGroupChatMsg(gcId){
+  const gc=groupChats.find(x=>x.id===gcId);if(!gc)return;
+  const inp=document.getElementById(`gc-inp-${gcId}`);if(!inp||!inp.value.trim())return;
+  gc.messages.push({from:CU.id,text:inp.value.trim(),ts:Date.now()});
+  inp.value='';
+  saveNewState();
+  openGroupChatView(gcId);
+}
+
+// ═══════════════════════════════════════════
+//  PATCH: Add status button to sidebar
+// ═══════════════════════════════════════════
+// Add trending hashtags section if not present
+const _origRenderGroupsBar=renderGroupsBar;
+renderGroupsBar=function(){
+  _origRenderGroupsBar();
+  // Add trending section to sidebar if card exists
+  const sidebar=document.getElementById('sidebar');
+  if(sidebar&&!document.getElementById('trending-card')){
+    const tc=document.createElement('div');
+    tc.className='card';tc.id='trending-card';
+    tc.innerHTML=`<div class="card-h"><h4><i class="fas fa-fire" style="color:var(--danger);"></i> Tendencias</h4></div><div id="trending-hashtags"></div>`;
+    sidebar.appendChild(tc);
+    renderTrendingHashtags();
+  }
+};
+
+// ═══════════════════════════════════════════
+//  PATCH: Add Story Reply/Reaction UI
+// ═══════════════════════════════════════════
+const _origRenderSV=typeof renderSV==='function'?renderSV:null;
+if(_origRenderSV){
+  renderSV=function(){
+    _origRenderSV();
+    // Add reaction buttons to story viewer
+    const svInner=document.getElementById('sv-inner');
+    if(svInner&&!document.getElementById('sv-rxns-el')){
+      const rxnDiv=document.createElement('div');
+      rxnDiv.id='sv-rxns-el';
+      rxnDiv.style.cssText='position:absolute;bottom:80px;left:50%;transform:translateX(-50%);z-index:10;';
+      rxnDiv.innerHTML=`<div class="sv-rxn-btns">${['❤️','😂','😮','😢','🔥','👏'].map(e=>`<button class="sv-rxn-btn" onclick="reactToStory('${e}')">${e}</button>`).join('')}</div>`;
+      svInner.appendChild(rxnDiv);
+      // Add reply bar
+      if(!document.getElementById('sv-reply-el')){
+        const rb=document.createElement('div');rb.id='sv-reply-el';rb.className='sv-reply-bar';
+        rb.innerHTML=`<input type="text" placeholder="Responder a la historia..." id="sv-reply-inp"><button class="sv-rxn-btn" onclick="sendStoryReply()" style="flex-shrink:0;"><i class="fas fa-paper-plane" style="font-size:.8rem;color:#fff;"></i></button>`;
+        svInner.appendChild(rb);
+      }
+    }
+  };
+}
+function reactToStory(emoji){toast(`${emoji} Reaccionaste a la historia`,'success');}
+function sendStoryReply(){const v=document.getElementById('sv-reply-inp')?.value.trim();if(!v)return;toast('💬 Respuesta enviada','success');document.getElementById('sv-reply-inp').value='';}
+
+// ═══════════════════════════════════════════
+//  PATCH: Post Thread feature
+// ═══════════════════════════════════════════
+function openThreadModal(postId){
+  const p=posts.find(x=>x.id===postId);if(!p)return;
+  const u=users.find(x=>x.id===p.userId);
+  p.thread=p.thread||[];
+  const body=document.getElementById('thread-modal-body');if(!body)return;
+  body.innerHTML=`
+    <div class="thread-item" style="background:var(--input-bg);border-radius:var(--r-md);padding:10px;margin-bottom:12px;">
+      <img src="${u?.photo||defAv()}" alt="" loading="lazy">
+      <div class="thread-item-body">
+        <div class="thread-item-meta">${esc(u?.username||'')} <span style="color:var(--text2);font-weight:400;font-size:.7rem;">· ${timeAgo(p.timestamp)}</span></div>
+        <div class="thread-item-text">${esc(p.content)}</div>
+      </div>
+    </div>
+    <div id="thread-replies">
+      ${p.thread.map(r=>{
+        const ru=users.find(x=>x.id===r.userId);
+        return `<div class="thread-item">
+          <img src="${ru?.photo||defAv()}" alt="" loading="lazy">
+          <div class="thread-item-body">
+            <div class="thread-item-meta">${esc(ru?.username||'')} <span style="color:var(--text2);font-weight:400;font-size:.7rem;">· ${timeAgo(r.ts)}</span></div>
+            <div class="thread-item-text">${esc(r.text)}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="thread-reply-input" style="display:flex;gap:7px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+      <img src="${CU.photo||defAv()}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="" loading="lazy">
+      <input type="text" id="thread-inp-${postId}" placeholder="Añadir respuesta al hilo..." style="flex:1;margin-bottom:0;" onkeypress="if(event.key==='Enter')addThreadReply(${postId})">
+      <button class="btn btn-primary" style="padding:7px 14px;" onclick="addThreadReply(${postId})"><i class="fas fa-paper-plane"></i></button>
+    </div>`;
+  openModal('thread-modal');
+}
+
+function addThreadReply(postId){
+  const p=posts.find(x=>x.id===postId);if(!p)return;
+  const inp=document.getElementById(`thread-inp-${postId}`);if(!inp||!inp.value.trim())return;
+  p.thread=p.thread||[];
+  p.thread.push({userId:CU.id,text:inp.value.trim(),ts:Date.now()});
+  inp.value='';save();
+  openThreadModal(postId);
+}
+
+// ═══════════════════════════════════════════
+//  PATCH postCard to add Thread button
+// ═══════════════════════════════════════════
+const _origPostCard=postCard;
+postCard=function(p){
+  let html=_origPostCard(p);
+  // Inject thread button into p-acts
+  const threadBtn=`<button class="act" onclick="openThreadModal(${p.id})" title="Ver hilo"><i class="fas fa-comments"></i> Hilo${p.thread?.length?` (${p.thread.length})`:''}</button>`;
+  // Ensure p-acts exists (no-op) then insert thread button before p-acts closing or before p-stats
+  html=html.replace(/(<div class="p-acts"[^>]*>)/,(match)=>match);
+  // Prefer explicit search for the closing comment, fallback to inserting before p-stats
+  const closingMarker = '</div><!-- /p-acts';
+  const idx = html.indexOf(closingMarker);
+  if(idx!==-1){
+    html = html.slice(0, idx) + threadBtn + html.slice(idx);
+  } else {
+    html = html.replace(/(<div class="p-stats)/, (m)=>threadBtn + m);
+  }
+  return html;
+};
+
+// Run init
+saveNewState();
+console.log('[Serakdep] New features loaded: Channels, Watch, Friends, Status, Voice, Threads, Group Chat');
+
+window.addEventListener('resize',()=>{
+  const layout=document.getElementById('msg-layout');
+  if(!layout)return;
+  if(window.innerWidth>780){
+    layout.classList.remove('chat-open');
+  }
+  
+  // --- Channels resize logic ---
+  const channelsLayout = document.getElementById('channels-layout');
+  if(channelsLayout) {
+      if(window.innerWidth > 780) {
+          channelsLayout.classList.remove('channels-open');
+          const backBtn = document.getElementById('ch-back-btn');
+          if(backBtn) backBtn.remove();
+      }
+  }
+  // --- End channels resize logic ---
+});
+</script>
 </body>
-</html>
