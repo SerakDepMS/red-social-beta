@@ -4,433 +4,529 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Serakdep MS · Iniciar Sesión</title>
-<meta name="description" content="Accede a Serakdep MS, la red social exclusiva de tu comunidad. Inicia sesión o crea tu cuenta.">
+<meta name="description" content="Accede a Serakdep MS, la red social exclusiva de tu comunidad.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
 <style>
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-  /* ═══ DESIGN TOKENS (mirrors style.css) ═══ */
-  :root {
-    --green:   #2d6a4f; --green-h: #1b4332; --green-m: #40916c;
-    --green-l: rgba(45,106,79,.10); --green-l2: rgba(45,106,79,.18);
-    --accent:  #74c69d;
-    --bg:      #eef7f2; --card: #ffffff; --card2: #f4faf7;
-    --text:    #0f1a12; --text2: #6b7280;
-    --border:  #c8e6c9;
-    --danger:  #ef4444; --danger-l: rgba(239,68,68,.10);
-    --sh1: 0 1px 4px rgba(0,0,0,.06);
-    --sh2: 0 6px 24px rgba(0,0,0,.09);
-    --sh3: 0 20px 60px rgba(0,0,0,.14);
-    --font-head: 'Plus Jakarta Sans', sans-serif;
-    --font-body: 'DM Sans', sans-serif;
-    --r-sm:8px; --r-md:14px; --r-lg:20px; --r-xl:28px; --r-2xl:36px; --r-pill:100px;
-  }
-  body.dark {
-    --bg:#071209; --card:rgba(14,24,16,.97); --card2:rgba(18,30,20,.95);
-    --text:#dff2ea; --text2:#6a8c76; --border:rgba(45,106,79,.22);
-    --green-l:rgba(45,106,79,.14); --green-l2:rgba(45,106,79,.22);
-    --sh2:0 6px 24px rgba(0,0,0,.5); --sh3:0 20px 60px rgba(0,0,0,.65);
-  }
-  body.theme-blue   { --green:#3b82f6;--green-h:#2563eb;--green-m:#60a5fa;--green-l:rgba(59,130,246,.10);--green-l2:rgba(59,130,246,.18);--accent:#93c5fd; }
-  body.theme-purple { --green:#7c3aed;--green-h:#6d28d9;--green-m:#a78bfa;--green-l:rgba(124,58,237,.10);--green-l2:rgba(124,58,237,.18);--accent:#c4b5fd; }
-  body.theme-pink   { --green:#ec4899;--green-h:#db2777;--green-m:#f472b6;--green-l:rgba(236,72,153,.10);--green-l2:rgba(236,72,153,.18);--accent:#fbcfe8; }
-  body.theme-orange { --green:#f59e0b;--green-h:#d97706;--green-m:#fbbf24;--green-l:rgba(245,158,11,.10);--green-l2:rgba(245,158,11,.18);--accent:#fde68a; }
-  body.theme-cyan   { --green:#06b6d4;--green-h:#0891b2;--green-m:#22d3ee;--green-l:rgba(6,182,212,.10);--green-l2:rgba(6,182,212,.18);--accent:#a5f3fc; }
-  body.theme-yellow { --green:#eab308;--green-h:#ca8a04;--green-m:#facc15;--green-l:rgba(234,179,8,.10);--green-l2:rgba(234,179,8,.18);--accent:#fef08a; }
-  body.theme-red    { --green:#dc2626;--green-h:#b91c1c;--green-m:#f87171;--green-l:rgba(220,38,38,.10);--green-l2:rgba(220,38,38,.18);--accent:#fca5a5; }
-  body.theme-teal   { --green:#0d9488;--green-h:#0f766e;--green-m:#2dd4bf;--green-l:rgba(13,148,136,.10);--green-l2:rgba(13,148,136,.18);--accent:#99f6e4; }
-  body.theme-amber  { --green:#d97706;--green-h:#b45309;--green-m:#f59e0b;--green-l:rgba(217,119,6,.10);--green-l2:rgba(217,119,6,.18);--accent:#fcd34d; }
+:root {
+  --purple: #7c3aed;
+  --purple-h: #5b21b6;
+  --purple-m: #a78bfa;
+  --purple-l: rgba(124,58,237,.12);
+  --purple-l2: rgba(124,58,237,.22);
+  --accent: #c4b5fd;
+  --danger: #ef4444;
+  --danger-l: rgba(239,68,68,.12);
+  --text: #f0eeff;
+  --text2: rgba(200,190,255,0.6);
+  --border: rgba(124,58,237,0.25);
+  --card: rgba(10,8,24,0.82);
+  --input-bg: rgba(15,10,35,0.7);
+  --font-body: 'Inter', sans-serif;
+  --font-head: 'Orbitron', sans-serif;
+}
 
-  html { font-size: 15px; -webkit-font-smoothing: antialiased; }
-  body {
-    font-family: var(--font-body);
-    background: var(--bg); color: var(--text);
-    min-height: 100vh; overflow-x: hidden;
-    transition: background .35s, color .25s;
-  }
+html { font-size: 15px; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--font-body);
+  background: #020008;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-  /* ═══ BACKGROUND ═══ */
-  .bg-layer { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-  .bg-blob {
-    position: absolute; border-radius: 50%; filter: blur(96px);
-    will-change: transform;
-    animation: blobDrift var(--dur,18s) ease-in-out infinite var(--delay,0s);
-    opacity: var(--op,.26);
-  }
-  .bb1 { width:580px;height:580px;background:var(--green-m);top:-200px;left:-140px;--dur:22s;--delay:0s; }
-  .bb2 { width:420px;height:420px;background:var(--accent);  bottom:-100px;right:-90px; --dur:26s;--delay:-8s;--op:.16; }
-  .bb3 { width:300px;height:300px;background:var(--green);   top:42%;left:36%;         --dur:18s;--delay:-14s;--op:.12; }
-  @keyframes blobDrift {
-    0%,100%{ transform:translate(0,0) scale(1); }
-    33%    { transform:translate(45px,-35px) scale(1.07); }
-    66%    { transform:translate(-30px,40px) scale(0.95); }
-  }
-  #particle-canvas { position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55; }
+/* ═══ INTRO CINEMATIC ZOOM ═══ */
+#intro-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: #000;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  pointer-events: none;
+}
+#intro-overlay .intro-logo {
+  font-family: var(--font-head);
+  font-size: 2.5rem; font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.08em;
+  opacity: 0;
+  transform: scale(0.4);
+  animation: introLogoIn 1.2s cubic-bezier(.22,1,.36,1) 0.4s both;
+}
+#intro-overlay .intro-logo span {
+  background: linear-gradient(135deg, var(--intro-c1, #7c3aed), var(--intro-c2, #a78bfa), var(--intro-c3, #c4b5fd));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+#intro-overlay .intro-sub {
+  font-size: 0.75rem; font-weight: 400;
+  color: rgba(200,180,255,0.6);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: introSubIn 0.8s ease 1.4s both;
+  margin-top: 10px;
+}
+#intro-overlay .intro-tagline {
+  font-family: var(--font-head);
+  font-size: 0.65rem; font-weight: 600;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: introSubIn 0.8s ease 2.2s both;
+  margin-top: 28px;
+}
+#intro-overlay .intro-bar {
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--intro-c1, #7c3aed), var(--intro-c3, #c4b5fd));
+  border-radius: 2px;
+  margin-top: 18px;
+  opacity: 0;
+  animation: introBarGrow 3.5s cubic-bezier(.4,0,.2,1) 2.4s both;
+}
+@keyframes introBarGrow {
+  0%   { width: 0; opacity: 0; }
+  10%  { opacity: 1; }
+  100% { width: 220px; opacity: 0.6; }
+}
 
-  /* ═══ LAYOUT ═══ */
-  .auth-split {
-    position: relative; z-index: 1;
-    display: flex; width: 100%; min-height: 100vh;
-  }
+@keyframes introLogoIn {
+  from { opacity:0; transform: scale(0.4) translateY(20px); }
+  to   { opacity:1; transform: scale(1) translateY(0); }
+}
+@keyframes introSubIn {
+  from { opacity:0; transform: translateY(8px); }
+  to   { opacity:0.8; transform: translateY(0); }
+}
 
-  /* ═══ LEFT PANEL ═══ */
-  .auth-left {
-    flex: 1.2;
-    display: flex; flex-direction: column;
-    justify-content: space-between; align-items: flex-start;
-    padding: 64px;
-    position: relative; overflow: hidden;
-    background: transparent;
-    border-right: 1px solid var(--border);
-  }
-  .auth-left-inner {
-    max-width: 470px; width: 100%; height: 100%;
-    display: flex; flex-direction: column;
-    justify-content: space-between;
-    position: relative; z-index: 10;
-  }
+/* Fade + zoom the WHOLE scene in */
+#intro-overlay.fade-out {
+  animation: introZoomFade 1.8s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes introZoomFade {
+  0%   { opacity:1; transform: scale(1); }
+  40%  { opacity:1; transform: scale(1.6); }
+  100% { opacity:0; transform: scale(4); pointer-events: none; }
+}
 
-  /* Brand */
-  .brand-row {
-    display: flex; align-items: center; gap: 14px;
-    margin-bottom: 28px;
-    animation: slideUp .6s cubic-bezier(.22,1,.36,1) both;
-  }
-  .brand-mark {
-    width: 50px; height: 50px; border-radius: 16px;
-    background: linear-gradient(135deg, var(--green-h), var(--green-m));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.4rem; color: #fff;
-    box-shadow: 0 6px 20px rgba(0,255,136,0.12); flex-shrink: 0;
-    position: relative; overflow: hidden;
-  }
-  .brand-mark::after {
-    content:''; position:absolute; inset:0;
-    background: linear-gradient(135deg, rgba(255,255,255,.22) 0%, transparent 55%);
-  }
-  .auth-left .brand-name {
-    font-family: var(--font-head); font-size: 1.9rem; font-weight: 900;
-    color: var(--text); letter-spacing: -.04em; line-height: 1;
-  }
-  .auth-left .brand-name span {
-    background: linear-gradient(135deg, var(--green) 0%, var(--green-m) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 900;
-  }
-  .auth-left .brand-sub { font-size: .8rem; font-weight: 500; color: var(--text2); margin-top: 3px; }
+/* ═══ SPACE CANVAS ═══ */
+#bh-canvas {
+  position: fixed; inset: 0;
+  width: 100vw; height: 100vh;
+  z-index: 0; pointer-events: none;
+}
 
-  /* Stat chips — glass effect so 3D scene shows through */
-  .auth-left .stat-chip {
-    background: var(--card) !important;
-    border-color: var(--border) !important;
-    color: var(--text) !important;
-    backdrop-filter: blur(6px);
-  }
-  .auth-left .stat-chip .sn { color: var(--green) !important; }
-  .auth-left .stat-chip .sl { color: var(--text2) !important; }
+/* ═══ PLANET LAYER ═══ */
+#planet-canvas {
+  position: fixed; inset: 0;
+  width: 100vw; height: 100vh;
+  z-index: 1; pointer-events: none;
+}
 
-  /* ─── Immersive 3D Space Background ─── */
-  #galaxy-canvas {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 0;
-    pointer-events: none;
-  }
+/* Gradient overlay */
+.bg-overlay {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 80% at 25% 50%, transparent 30%, rgba(2,0,8,0.75) 75%),
+    radial-gradient(ellipse 40% 60% at 75% 50%, transparent 20%, rgba(2,0,8,0.6) 70%);
+}
 
+/* ═══ LAYOUT ═══ */
+.auth-split {
+  position: relative; z-index: 3;
+  display: flex; width: 100%; min-height: 100vh;
+  opacity: 0;
+  animation: pageReveal 0.8s ease 6.2s both;
+}
+@keyframes pageReveal {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
+/* ═══ LEFT PANEL ═══ */
+.auth-left {
+  flex: 1.3;
+  display: flex; flex-direction: column;
+  justify-content: space-between; align-items: flex-start;
+  padding: 60px 64px;
+  position: relative;
+}
 
+.auth-left-inner {
+  max-width: 680px; width: 100%;
+  display: flex; flex-direction: column;
+  gap: 0;
+  position: relative; z-index: 2;
+  height: 100%;
+  justify-content: space-between;
+}
 
-  /* Stats bar */
-  .stats-bar {
-    display: grid; grid-template-columns: repeat(4,1fr); gap: 10px;
-    animation: slideUp .8s cubic-bezier(.22,1,.36,1) .12s both;
-  }
-  .stat-chip {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--r-md); padding: 12px 8px;
-    text-align: center;
-    transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s, border-color .25s;
-    cursor: default;
-  }
-  .stat-chip:hover {
-    transform: translateY(-4px) scale(1.04);
-    box-shadow: var(--sh2), 0 4px 15px var(--green-l2);
-    border-color: var(--green);
-  }
-  .stat-chip .sn {
-    display: block; font-family: var(--font-head);
-    font-size: 1.15rem; font-weight: 900; color: var(--green);
-  }
-  .stat-chip .sl {
-    font-size: .66rem; font-weight: 600; color: var(--text2);
-    text-transform: uppercase; letter-spacing: .07em; margin-top: 2px;
-  }
+/* Brand */
+.brand-row {
+  display: flex; align-items: center; gap: 16px;
+  animation: slideUp .6s cubic-bezier(.22,1,.36,1) 6.4s both;
+}
+.brand-mark {
+  width: 56px; height: 56px; border-radius: 18px;
+  background: linear-gradient(135deg, var(--purple-h), var(--purple-m));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; color: #fff;
+  box-shadow: 0 8px 32px var(--purple-l2), inset 0 1px 0 rgba(255,255,255,.15);
+  flex-shrink: 0; position: relative; overflow: hidden;
+}
+.brand-mark::after {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(135deg, rgba(255,255,255,.22) 0%, transparent 55%);
+}
+.brand-name {
+  font-family: var(--font-head); font-size: 2rem; font-weight: 900;
+  color: var(--text); letter-spacing: 0.03em; line-height: 1;
+}
+.brand-name span {
+  background: linear-gradient(135deg, var(--purple) 0%, var(--purple-m) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.brand-sub { font-size: .78rem; font-weight: 400; color: var(--text2); margin-top: 5px; letter-spacing: 0.05em; }
 
-  /* ═══ SEPARATOR ═══ */
-  .auth-right {
-    flex: 0 0 460px;
-    display: flex; align-items: center; justify-content: center;
-    padding: 44px 38px; position: relative;
-  }
-  .auth-right::before {
-    content:''; position:absolute; left:0; top:8%; bottom:8%;
-    width:1px;
-    background: linear-gradient(to bottom, transparent, var(--border), transparent);
-  }
+/* ═══ FEATURE CARDS — HORIZONTAL BOTTOM ROW ═══ */
+.feature-list {
+  display: flex; flex-direction: row; gap: 10px;
+  animation: slideUp .8s cubic-bezier(.22,1,.36,1) 6.6s both;
+  flex-wrap: wrap;
+}
 
-  /* ═══ FORM CARD ═══ */
-  .auth-card {
-    width: 100%; max-width: 385px;
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--r-2xl); padding: 36px 32px;
-    box-shadow: var(--sh3), 0 0 35px var(--green-l2);
-    animation: cardIn .75s cubic-bezier(.22,1,.36,1) both;
-    position: relative; overflow: hidden;
-    backdrop-filter: blur(14px);
-    transition: box-shadow 0.4s ease, border-color 0.4s ease;
-  }
-  .auth-card:hover {
-    box-shadow: var(--sh3), 0 0 50px var(--green-l);
-    border-color: var(--green-m);
-  }
-  .auth-card::before {
-    content:''; position:absolute; top:0; left:0; right:0; height:3.5px;
-    background: linear-gradient(90deg, var(--green-h), var(--green-m), var(--accent));
-    border-radius: var(--r-2xl) var(--r-2xl) 0 0;
-  }
-  @keyframes cardIn {
-    from { opacity:0; transform:translateY(28px) scale(.97); }
-    to   { opacity:1; transform:translateY(0) scale(1); }
-  }
-  @keyframes slideUp {
-    from { opacity:0; transform:translateY(22px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
+.feature-item {
+  display: flex; align-items: center; gap: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+  cursor: default;
+  flex: 1 1 calc(50% - 5px);
+  min-width: 200px;
+  transition:
+    transform 0.35s cubic-bezier(.34,1.56,.64,1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+  position: relative;
+}
 
-  /* Form header */
-  .form-header { text-align:center; margin-bottom:26px; }
-  .form-logo {
-    width:50px; height:50px; margin:0 auto 14px;
-    border-radius:16px;
-    background: linear-gradient(135deg, var(--green-h), var(--green-m));
-    display:flex; align-items:center; justify-content:center;
-    font-size:1.3rem; color:#fff;
-    box-shadow: 0 4px 16px var(--green-l2);
-    position:relative; overflow:hidden;
-    animation: spinLogo 8s linear infinite;
-  }
-  .form-logo::after {
-    content:''; position:absolute; inset:0;
-    background: linear-gradient(135deg, rgba(255,255,255,.22) 0%, transparent 55%);
-  }
-  @keyframes spinLogo {
-    0%,90%,100% { transform:rotate(0deg); }
-    95% { transform:rotate(15deg); }
-    97% { transform:rotate(-8deg); }
-  }
-  .form-header h1 {
-    font-family: var(--font-head); font-size: 1.45rem; font-weight: 800;
-    color: var(--text); letter-spacing: -.025em; margin-bottom: 5px;
-  }
-  .form-header p { font-size:.82rem; color: var(--text2); }
+.feature-item::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--purple-l) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  border-radius: 16px;
+}
 
-  /* Tabs */
-  .auth-tabs {
-    display:flex;
-    background: var(--card2); border: 1.5px solid var(--border);
-    border-radius: var(--r-pill); padding:4px; gap:3px;
-    margin-bottom:24px; position:relative;
-  }
-  .auth-tab-indicator {
-    position:absolute; top:4px; bottom:4px; left:4px;
-    width:calc(50% - 4px);
-    background: var(--green);
-    border-radius: var(--r-pill);
-    box-shadow: 0 3px 12px var(--green-l2);
-    transition: transform .38s cubic-bezier(.34,1.56,.64,1);
-    pointer-events:none; z-index:1;
-  }
-  .auth-tabs.on-register .auth-tab-indicator { transform:translateX(100%); }
-  .auth-tab {
-    flex:1; padding:9px 12px; border-radius:var(--r-pill);
-    border:none; background:none; cursor:pointer;
-    font-family:var(--font-head); font-weight:700; font-size:.82rem;
-    color:var(--text2); transition:color .22s; position:relative; z-index:2;
-  }
-  .auth-tab.active { color:#fff; }
+.feature-item:hover {
+  transform: translateX(8px) scale(1.01);
+  box-shadow: 0 8px 40px var(--purple-l2), 0 0 0 1px var(--purple-m);
+  border-color: var(--purple-m);
+}
+.feature-item:hover::before { opacity: 1; }
 
-  /* Error */
-  .auth-err {
-    display:none; background:var(--danger-l);
-    border:1px solid rgba(239,68,68,.25); border-left:3px solid var(--danger);
-    color:var(--danger); padding:10px 13px; border-radius:var(--r-md);
-    font-size:.8rem; font-weight:600; margin-bottom:16px;
-    animation: errShake .4s ease;
-  }
-  @keyframes errShake {
-    0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)}
-    40%{transform:translateX(6px)}   60%{transform:translateX(-4px)}
-    80%{transform:translateX(4px)}
-  }
+.fi-icon-wrap {
+  padding: 16px 18px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.fi-icon {
+  width: 42px; height: 42px; border-radius: 13px;
+  background: var(--purple-l);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; color: var(--purple-m);
+  flex-shrink: 0;
+  transition: background 0.3s, transform 0.3s;
+}
+.feature-item:hover .fi-icon {
+  background: var(--purple-l2);
+  transform: scale(1.1) rotate(-5deg);
+}
 
-  /* Fields */
-  .auth-field { margin-bottom:16px; }
-  .auth-field label {
-    display:block; margin-bottom:6px;
-    font-family:var(--font-head); font-size:.78rem; font-weight:700;
-    color:var(--text2); letter-spacing:.01em;
-    transition:color .2s;
-  }
-  .auth-field:focus-within label { color:var(--green); }
-  .field-wrap { position:relative; }
-  .field-icon {
-    position:absolute; left:13px; top:50%;
-    transform:translateY(-50%);
-    color:var(--text2); font-size:.82rem;
-    pointer-events:none; transition:color .2s;
-  }
-  .field-wrap:focus-within .field-icon { color:var(--green); }
-  .field-wrap input {
-    width:100%; padding:11px 40px 11px 38px;
-    background:var(--card2); border:1.5px solid var(--border);
-    border-radius:var(--r-md);
-    font-family:var(--font-body); font-size:.9rem; color:var(--text);
-    outline:none; transition:border-color .25s, background .25s, box-shadow .25s;
-    -webkit-appearance:none;
-  }
-  .field-wrap input::placeholder { color:var(--text2); opacity:.45; }
-  .field-wrap input:focus {
-    border-color:var(--green); background:var(--card);
-    box-shadow: 0 0 0 3px var(--green-l), 0 0 12px var(--green-l2);
-  }
-  .field-icon {
-    position:absolute; left:13px; top:50%;
-    transform:translateY(-50%);
-    color:var(--text2); font-size:.82rem;
-    pointer-events:none; transition:color .25s, transform .25s;
-  }
-  .field-wrap:focus-within .field-icon {
-    color:var(--green);
-    transform:translateY(-50%) scale(1.15);
-  }
-  .field-wrap input:-webkit-autofill {
-    -webkit-box-shadow:0 0 0 40px var(--card2) inset !important;
-    -webkit-text-fill-color:var(--text) !important;
-    border-color:var(--green) !important;
-  }
-  .field-icon-after {
-    position:absolute; right:11px; top:50%; transform:translateY(-50%);
-    background:none; border:none; cursor:pointer;
-    color:var(--text2); font-size:.8rem; padding:4px;
-    border-radius:6px; transition:color .15s;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .field-icon-after:hover { color:var(--green); }
+.fi-content {
+  flex: 1;
+  padding: 12px 10px 12px 0;
+  display: flex; flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+}
+.fi-title {
+  font-family: var(--font-head); font-size: .78rem; font-weight: 700;
+  color: var(--text); letter-spacing: 0.02em;
+}
+.fi-desc {
+  font-size: .73rem; color: var(--text2); line-height: 1.45;
+  max-height: 0; overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s cubic-bezier(.4,0,.2,1), opacity 0.35s ease;
+}
+.feature-item:hover .fi-desc {
+  max-height: 60px;
+  opacity: 1;
+}
 
-  /* 2FA */
-  #fa2-login-wrap { display:none; overflow:hidden; animation:dropIn .3s ease; }
-  @keyframes dropIn {
-    from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)}
-  }
+/* Expand indicator */
+.fi-arrow {
+  padding: 16px 14px;
+  display: flex; align-items: center;
+  color: var(--text2);
+  font-size: 0.65rem;
+  transition: transform 0.3s ease, color 0.3s ease;
+  flex-shrink: 0;
+}
+.feature-item:hover .fi-arrow {
+  transform: translateX(4px);
+  color: var(--purple-m);
+}
 
-  /* Submit button */
-  .btn-submit {
-    width:100%; padding:13px;
-    background:linear-gradient(135deg,var(--green-h) 0%,var(--green) 50%,var(--green-m) 100%);
-    background-size:200% 200%; animation:btnShimmer 3.5s ease infinite;
-    color:#fff; font-family:var(--font-head); font-size:.94rem; font-weight:800;
-    border:none; border-radius:var(--r-md);
-    cursor:pointer; letter-spacing:.01em;
-    display:flex; align-items:center; justify-content:center; gap:8px;
-    box-shadow:0 4px 20px var(--green-l2);
-    transition:transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
-    position:relative; overflow:hidden; margin-top:6px;
-  }
-  .btn-submit:hover {
-    transform:translateY(-3px) scale(1.015);
-    box-shadow:0 8px 28px var(--green-l2), 0 0 16px var(--green-m);
-  }
-  .btn-submit:active {
-    transform:translateY(-1px) scale(0.985);
-  }
-  .btn-submit:active { transform:translateY(0); }
-  .btn-submit::after {
-    content:''; position:absolute; inset:0;
-    background:linear-gradient(135deg,rgba(255,255,255,.16) 0%,transparent 50%);
-    pointer-events:none;
-  }
-  @keyframes btnShimmer {
-    0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%}
-  }
-  .btn-submit .spinner {
-    width:16px; height:16px; border:2px solid rgba(255,255,255,.35);
-    border-top-color:#fff; border-radius:50%;
-    animation:spin .7s linear infinite; display:none;
-  }
-  .btn-submit.loading .spinner { display:block; }
-  .btn-submit.loading .btn-text { display:none; }
-  @keyframes spin { to{transform:rotate(360deg)} }
+/* ═══ RIGHT — FORM ═══ */
+.auth-right {
+  flex: 0 0 460px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 44px 38px; position: relative;
+}
+.auth-right::before {
+  content:''; position:absolute; left:0; top:8%; bottom:8%;
+  width:1px;
+  background: linear-gradient(to bottom, transparent, var(--border), transparent);
+}
 
-  /* Demo */
-  .demo-badge {
-    margin-top:16px; padding:10px 14px;
-    background:var(--card2); border:1px dashed var(--border);
-    border-radius:var(--r-md);
-    font-size:.76rem; color:var(--text2); line-height:1.6; text-align:center;
-  }
-  .demo-badge strong { color:var(--green); font-weight:700; font-family:var(--font-head); }
+/* Form Card */
+.auth-card {
+  width: 100%; max-width: 385px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 28px; padding: 36px 32px;
+  box-shadow: 0 8px 60px rgba(124,58,237,.18), 0 0 0 1px rgba(124,58,237,.08);
+  animation: cardIn .75s cubic-bezier(.22,1,.36,1) 6.4s both;
+  position: relative; overflow: hidden;
+  backdrop-filter: blur(24px);
+  transition: box-shadow .4s, border-color .4s;
+}
+.auth-card:hover {
+  box-shadow: 0 12px 70px rgba(124,58,237,.25), 0 0 0 1px rgba(167,139,250,.3);
+}
+.auth-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background: linear-gradient(90deg, var(--purple-h), var(--purple-m), var(--accent));
+  border-radius: 28px 28px 0 0;
+}
 
-  /* Panels */
-  .auth-panel { display:none; animation:dropIn .3s ease; }
-  .auth-panel.active { display:block; }
-  .terms-txt { text-align:center; font-size:.73rem; color:var(--text2); margin-top:14px; line-height:1.55; }
+@keyframes cardIn {
+  from { opacity:0; transform:translateY(28px) scale(.97); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(22px); }
+  to   { opacity:1; transform:translateY(0); }
+}
 
-  /* ═══ RESPONSIVE ═══ */
-  @media (max-width:960px) {
-    .auth-left { display:none; }
-    .auth-right { flex:1; padding:36px 22px; }
-    .auth-right::before { display:none; }
-    .auth-card { max-width:440px; }
-  }
-  @media (max-width:480px) {
-    .auth-right { padding:20px 14px; padding-top:42px; }
-    .auth-card { padding:26px 18px; border-radius:var(--r-xl); }
-  }
-  ::-webkit-scrollbar{width:6px;height:6px;}
-  ::-webkit-scrollbar-track{background:transparent;}
-  ::-webkit-scrollbar-thumb{background:var(--green-m);border-radius:10px;transition:background 0.2s;}
-  ::-webkit-scrollbar-thumb:hover{background:var(--green);}
+/* Form header */
+.form-header { text-align:center; margin-bottom:26px; }
+.form-logo {
+  width:52px; height:52px; margin:0 auto 14px;
+  border-radius:16px;
+  background: linear-gradient(135deg, var(--purple-h), var(--purple-m));
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.3rem; color:#fff;
+  box-shadow: 0 4px 20px var(--purple-l2);
+  position:relative; overflow:hidden;
+  animation: spinLogo 8s linear infinite;
+}
+.form-logo::after {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(135deg, rgba(255,255,255,.22) 0%, transparent 55%);
+}
+@keyframes spinLogo {
+  0%,90%,100%{transform:rotate(0deg)} 95%{transform:rotate(15deg)} 97%{transform:rotate(-8deg)}
+}
+.form-header h1 {
+  font-family: var(--font-head); font-size: 1.3rem; font-weight: 700;
+  color: var(--text); letter-spacing: 0.02em; margin-bottom: 5px;
+}
+.form-header p { font-size:.8rem; color: var(--text2); }
+
+/* Tabs */
+.auth-tabs {
+  display:flex;
+  background: rgba(15,10,35,0.5); border: 1px solid var(--border);
+  border-radius: 100px; padding:4px; gap:3px;
+  margin-bottom:24px; position:relative;
+}
+.auth-tab-indicator {
+  position:absolute; top:4px; bottom:4px; left:4px;
+  width:calc(50% - 4px);
+  background: var(--purple);
+  border-radius: 100px;
+  box-shadow: 0 3px 14px var(--purple-l2);
+  transition: transform .38s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none; z-index:1;
+}
+.auth-tabs.on-register .auth-tab-indicator { transform:translateX(100%); }
+.auth-tab {
+  flex:1; padding:9px 12px; border-radius:100px;
+  border:none; background:none; cursor:pointer;
+  font-family:var(--font-head); font-weight:600; font-size:.72rem;
+  color:var(--text2); transition:color .22s; position:relative; z-index:2;
+  letter-spacing: 0.02em;
+}
+.auth-tab.active { color:#fff; }
+
+/* Error */
+.auth-err {
+  display:none;
+  background:var(--danger-l); border:1px solid rgba(239,68,68,.25);
+  border-left:3px solid var(--danger);
+  color:var(--danger); padding:10px 13px;
+  border-radius:12px; font-size:.8rem; font-weight:600;
+  margin-bottom:16px; animation: errShake .4s ease;
+}
+@keyframes errShake {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)}
+}
+
+/* Fields */
+.auth-field { margin-bottom:16px; }
+.auth-field label {
+  display:block; margin-bottom:6px;
+  font-family:var(--font-head); font-size:.68rem; font-weight:600;
+  color:var(--text2); letter-spacing:.04em; transition:color .2s;
+  text-transform: uppercase;
+}
+.auth-field:focus-within label { color:var(--purple-m); }
+.field-wrap { position:relative; }
+.field-icon {
+  position:absolute; left:13px; top:50%;
+  transform:translateY(-50%);
+  color:var(--text2); font-size:.82rem;
+  pointer-events:none; transition:color .25s, transform .25s;
+}
+.field-wrap:focus-within .field-icon {
+  color:var(--purple-m); transform:translateY(-50%) scale(1.15);
+}
+.field-wrap input {
+  width:100%; padding:11px 40px 11px 38px;
+  background:var(--input-bg); border:1px solid var(--border);
+  border-radius:12px;
+  font-family:var(--font-body); font-size:.9rem; color:var(--text);
+  outline:none; transition:border-color .25s, background .25s, box-shadow .25s;
+  -webkit-appearance:none;
+}
+.field-wrap input::placeholder { color:var(--text2); opacity:.45; }
+.field-wrap input:focus {
+  border-color:var(--purple-m); background:rgba(15,10,40,0.9);
+  box-shadow: 0 0 0 3px var(--purple-l), 0 0 16px var(--purple-l2);
+}
+.field-wrap input:-webkit-autofill {
+  -webkit-box-shadow:0 0 0 40px #0a0820 inset !important;
+  -webkit-text-fill-color:var(--text) !important;
+  border-color:var(--purple) !important;
+}
+.field-icon-after {
+  position:absolute; right:11px; top:50%; transform:translateY(-50%);
+  background:none; border:none; cursor:pointer;
+  color:var(--text2); font-size:.8rem; padding:4px;
+  border-radius:6px; transition:color .15s;
+  display:flex; align-items:center; justify-content:center;
+}
+.field-icon-after:hover { color:var(--purple-m); }
+
+#fa2-login-wrap { display:none; overflow:hidden; animation:dropIn .3s ease; }
+@keyframes dropIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+
+/* Submit button */
+.btn-submit {
+  width:100%; padding:13px;
+  background:linear-gradient(135deg, var(--purple-h) 0%, var(--purple) 50%, var(--purple-m) 100%);
+  background-size:200% 200%; animation:btnShimmer 3.5s ease infinite;
+  color:#fff; font-family:var(--font-head); font-size:.8rem; font-weight:700;
+  border:none; border-radius:12px;
+  cursor:pointer; letter-spacing:.04em;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  box-shadow:0 4px 24px var(--purple-l2);
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
+  position:relative; overflow:hidden; margin-top:6px;
+}
+.btn-submit:hover {
+  transform:translateY(-3px) scale(1.015);
+  box-shadow:0 8px 32px var(--purple-l2), 0 0 20px var(--purple-m);
+}
+.btn-submit:active { transform:translateY(0); }
+.btn-submit::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.16) 0%,transparent 50%);
+  pointer-events:none;
+}
+@keyframes btnShimmer {
+  0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%}
+}
+.btn-submit .spinner {
+  width:16px; height:16px; border:2px solid rgba(255,255,255,.35);
+  border-top-color:#fff; border-radius:50%;
+  animation:spin .7s linear infinite; display:none;
+}
+.btn-submit.loading .spinner { display:block; }
+.btn-submit.loading .btn-text { display:none; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+.demo-badge {
+  margin-top:16px; padding:10px 14px;
+  background:rgba(15,10,35,0.5); border:1px dashed var(--border);
+  border-radius:12px;
+  font-size:.76rem; color:var(--text2); line-height:1.6; text-align:center;
+}
+.demo-badge strong { color:var(--purple-m); font-weight:700; font-family:var(--font-head); }
+
+.auth-panel { display:none; animation:dropIn .3s ease; }
+.auth-panel.active { display:block; }
+.terms-txt { text-align:center; font-size:.73rem; color:var(--text2); margin-top:14px; line-height:1.55; }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width:960px) {
+  .auth-left { display:none; }
+  .auth-right { flex:1; padding:36px 22px; }
+  .auth-right::before { display:none; }
+  .auth-card { max-width:440px; }
+}
+@media (max-width:480px) {
+  .auth-right { padding:20px 14px; padding-top:42px; }
+  .auth-card { padding:26px 18px; border-radius:20px; }
+}
+::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--purple-m);border-radius:10px;}
 </style>
 </head>
 <body>
-<script>
-  (function(){
-    const t = localStorage.getItem('sms_theme');
-    const c = localStorage.getItem('sms_color');
-    if(t === 'dark') document.body.classList.add('dark');
-    if(c && c !== 'green') document.body.classList.add('theme-' + c);
-  })();
-</script>
 
-<!-- Background -->
-<div class="bg-layer" aria-hidden="true">
-  <div class="bg-blob bb1"></div>
-  <div class="bg-blob bb2"></div>
-  <div class="bg-blob bb3"></div>
+<!-- Intro overlay -->
+<div id="intro-overlay">
+  <div class="intro-logo">Serakdep <span>MS</span></div>
+  <div class="intro-sub">Red Social de Comunidad</div>
+  <div class="intro-bar"></div>
+  <div class="intro-tagline">Conecta · Comparte · Crece</div>
 </div>
-<canvas id="galaxy-canvas" aria-hidden="true"></canvas>
+
+<!-- Space canvas -->
+<canvas id="bh-canvas" aria-hidden="true"></canvas>
+<!-- Planet canvas -->
+<canvas id="planet-canvas" aria-hidden="true"></canvas>
+
+<!-- Gradient overlay -->
+<div class="bg-overlay" aria-hidden="true"></div>
 
 <div class="auth-split">
 
-  <!-- ══ LEFT — Brand + 3D Character ══ -->
+  <!-- ══ LEFT — Brand + Features ══ -->
   <div class="auth-left">
     <div class="auth-left-inner">
 
@@ -443,14 +539,53 @@
         </div>
       </div>
 
+      <!-- Feature cards — hover to expand -->
+      <div class="feature-list">
 
+        <div class="feature-item">
+          <div class="fi-icon-wrap">
+            <div class="fi-icon"><i class="fas fa-globe"></i></div>
+          </div>
+          <div class="fi-content">
+            <div class="fi-title">Foro Público & Privado</div>
+            <div class="fi-desc">Posts, reels, historias e hilos con tu comunidad en tiempo real. Hashtags, reacciones y modo efímero incluidos.</div>
+          </div>
+          <div class="fi-arrow"><i class="fas fa-chevron-right"></i></div>
+        </div>
 
-      <!-- Stats -->
-      <div class="stats-bar">
-        <div class="stat-chip"><span class="sn">∞</span><span class="sl">Posts</span></div>
-        <div class="stat-chip"><span class="sn">🔒</span><span class="sl">Privado</span></div>
-        <div class="stat-chip"><span class="sn">2FA</span><span class="sl">Seguro</span></div>
-        <div class="stat-chip"><span class="sn">🌿</span><span class="sl">Clan</span></div>
+        <div class="feature-item">
+          <div class="fi-icon-wrap">
+            <div class="fi-icon"><i class="fas fa-comment-dots"></i></div>
+          </div>
+          <div class="fi-content">
+            <div class="fi-title">Mensajes Directos</div>
+            <div class="fi-desc">Chat privado con cifrado de extremo a extremo, reacciones emoji, respuestas encadenadas y mensajes efímeros.</div>
+          </div>
+          <div class="fi-arrow"><i class="fas fa-chevron-right"></i></div>
+        </div>
+
+        <div class="feature-item">
+          <div class="fi-icon-wrap">
+            <div class="fi-icon"><i class="fas fa-users"></i></div>
+          </div>
+          <div class="fi-content">
+            <div class="fi-title">Grupos & Eventos</div>
+            <div class="fi-desc">Crea grupos temáticos, organiza eventos con tu clan, gestiona un marketplace propio y canales tipo Discord.</div>
+          </div>
+          <div class="fi-arrow"><i class="fas fa-chevron-right"></i></div>
+        </div>
+
+        <div class="feature-item">
+          <div class="fi-icon-wrap">
+            <div class="fi-icon"><i class="fas fa-shield-halved"></i></div>
+          </div>
+          <div class="fi-content">
+            <div class="fi-title">2FA & Moderación</div>
+            <div class="fi-desc">Autenticación TOTP de doble factor, sistema de moderación comunitario, suspensiones y panel de reportes.</div>
+          </div>
+          <div class="fi-arrow"><i class="fas fa-chevron-right"></i></div>
+        </div>
+
       </div>
 
     </div>
@@ -559,877 +694,501 @@ function authTab(t) {
   document.getElementById('auth-err').style.display = 'none';
   document.getElementById('form-title').textContent    = t==='login' ? 'Bienvenido de nuevo' : 'Únete al clan';
   document.getElementById('form-subtitle').textContent = t==='login' ? 'Accede a tu cuenta de Serakdep MS' : 'Crea tu cuenta en Serakdep MS';
-  if (window._charSet) window._charSet(t==='login' ? 'curious' : 'wave');
 }
-
 function authErr(msg) {
   const e = document.getElementById('auth-err');
   e.textContent = msg; e.style.display = 'block';
   e.style.animation = 'none'; e.offsetHeight; e.style.animation = '';
-  if (window._charSet) window._charSet('error');
 }
-
 function togglePwd(id, btn) {
   const inp = document.getElementById(id), icon = btn.querySelector('i');
   inp.type = inp.type==='password' ? 'text' : 'password';
   icon.className = inp.type==='password' ? 'fas fa-eye' : 'fas fa-eye-slash';
 }
-
 function setLoading(id, v) {
   const b = document.getElementById(id); if(b) b.classList.toggle('loading', v);
 }
-
 function handleLoginClick() {
   if (typeof doLogin!=='function') { authErr('Cargando… espera un momento.'); return; }
-  if (window._charSet) window._charSet('excited');
   setLoading('login-btn', true);
   setTimeout(()=>{ doLogin(); setLoading('login-btn',false); }, 350);
 }
-
 function handleRegisterClick() {
   if (typeof doRegister!=='function') { authErr('Cargando… espera un momento.'); return; }
-  if (window._charSet) window._charSet('excited');
   setLoading('register-btn', true);
   setTimeout(()=>{ doRegister(); setLoading('register-btn',false); }, 350);
 }
 </script>
 
-<!-- ═══════════════════════════════════════════════════════════
-     THREE.JS 3D IMMERSIVE SPACE — ULTRA EDITION
-═══════════════════════════════════════════════════════════ -->
+<!-- ═══ INTRO CINEMATIC TRIGGER ═══ -->
 <script>
-(function(){
-  if(!window.THREE) return;
+(function() {
+  // ─── Sync intro colors with user's saved color preference ───
+  const COLOR_MAP = {
+    'blue':   ['#3b82f6', '#60a5fa', '#93c5fd'],
+    'purple': ['#7c3aed', '#a78bfa', '#c4b5fd'],
+    'pink':   ['#ec4899', '#f472b6', '#fbcfe8'],
+    'orange': ['#f59e0b', '#fbbf24', '#fde68a'],
+    'cyan':   ['#06b6d4', '#22d3ee', '#a5f3fc'],
+    'yellow': ['#eab308', '#facc15', '#fef08a'],
+    'red':    ['#dc2626', '#f87171', '#fca5a5'],
+    'teal':   ['#0d9488', '#2dd4bf', '#99f6e4'],
+    'amber':  ['#d97706', '#f59e0b', '#fcd34d'],
+    'green':  ['#2d6a4f', '#40916c', '#74c69d'],
+  };
+  const savedColor = localStorage.getItem('sms_color') || 'purple';
+  const colors = COLOR_MAP[savedColor] || COLOR_MAP['purple'];
+  const overlay = document.getElementById('intro-overlay');
+  overlay.style.setProperty('--intro-c1', colors[0]);
+  overlay.style.setProperty('--intro-c2', colors[1]);
+  overlay.style.setProperty('--intro-c3', colors[2]);
 
+  // ─── Dynamic glow behind the logo ───
+  overlay.style.background = `radial-gradient(ellipse 60% 60% at 50% 50%, color-mix(in srgb, ${colors[0]} 15%, #000) 0%, #000 70%)`;
+
+  // ─── Start the zoom-out after 5.2s (total ≥ 6s with 1.8s fade) ───
+  setTimeout(() => {
+    overlay.classList.add('fade-out');
+  }, 5200);
+  // Remove from DOM after animation
+  setTimeout(() => {
+    overlay.style.display = 'none';
+  }, 7200);
+})();
+</script>
+
+<!-- ═══ PLANET COLLISION ENGINE ═══ -->
+<script>
+(function() {
+  if (!window.THREE) return;
   const T = THREE;
-  const canvas = document.getElementById('galaxy-canvas');
+  const canvas = document.getElementById('planet-canvas');
   let W = window.innerWidth, H = window.innerHeight;
 
-  /* ─ Glowing Dot Texture Generator ─ */
-  function createGlowTexture() {
-    const canvas = document.createElement('canvas');
-    canvas.width = 32;
-    canvas.height = 32;
-    const ctx = canvas.getContext('2d');
-    const grad = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
-    grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    grad.addColorStop(0.2, 'rgba(255, 255, 255, 0.8)');
-    grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.22)');
-    grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 32, 32);
-    return new T.CanvasTexture(canvas);
-  }
-  const glowTexture = createGlowTexture();
-
-  /* ─ Renderer ─ */
   const renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setSize(W, H);
   renderer.setClearColor(0x000000, 0);
-  renderer.physicallyCorrectLights = true;
-  renderer.toneMapping = T.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.2;
 
-  /* ─ Scene & Camera ─ */
   const scene = new T.Scene();
-  const camera = new T.PerspectiveCamera(45, W / H, 0.1, 200);
-  camera.position.set(0, 0.5, 7.0);
-  camera.lookAt(0, 0.0, 0);
+  const camera = new T.PerspectiveCamera(50, W / H, 0.01, 500);
+  camera.position.set(0, 0, 18);
+  camera.lookAt(0, 0, 0);
 
-  /* ─ Lighting ─ */
-  scene.add(new T.AmbientLight(0x0a0a1a, 2.0));
-  const sunLight = new T.PointLight(0xfff5cc, 3.5, 40);
-  sunLight.position.set(5, 3, 4);
-  scene.add(sunLight);
-  const rimLight = new T.PointLight(0x4488ff, 1.8, 30);
-  rimLight.position.set(-6, -2, -3);
-  scene.add(rimLight);
-  const lavLight = new T.PointLight(0xff4400, 2.2, 20);
-  lavLight.position.set(0, -1, 2);
-  scene.add(lavLight);
+  scene.add(new T.AmbientLight(0x221133, 1.0));
+  const sun = new T.PointLight(0xffa040, 6.0, 80);
+  sun.position.set(-20, 8, 10);
+  scene.add(sun);
+  const blueLight = new T.PointLight(0x6644ff, 3.0, 60);
+  blueLight.position.set(15, -5, 5);
+  scene.add(blueLight);
 
-  /* ─ Root Groups ─ */
-  const spaceGroup = new T.Group();
-  scene.add(spaceGroup);
-  const blackHoleGroup = new T.Group();
-  spaceGroup.add(blackHoleGroup);
-
-  function positionBlackHole() {
-    if (W > 960) blackHoleGroup.position.set(-1.4, 0.05, 0);
-    else         blackHoleGroup.position.set(0, 0.5, -1.0);
-  }
-  positionBlackHole();
-
-  /* ════════════════════════════════════════════════
-     BLACK HOLE — Double-ring Gravitational Lens
-  ════════════════════════════════════════════════ */
-
-  // Event horizon (absolute black)
-  const horizonGeo = new T.SphereGeometry(0.28, 48, 48);
-  const horizonMat = new T.MeshBasicMaterial({ color: 0x000000 });
-  const horizon = new T.Mesh(horizonGeo, horizonMat);
-  blackHoleGroup.add(horizon);
-
-  // Photon ring — inner hot white ring
-  const photonRingGeo = new T.TorusGeometry(0.30, 0.018, 12, 96);
-  photonRingGeo.rotateX(Math.PI / 2);
-  const photonRingMat = new T.MeshBasicMaterial({
-    color: 0xffffff, transparent: true, opacity: 1.0,
-    blending: T.AdditiveBlending, depthWrite: false
-  });
-  const photonRing = new T.Mesh(photonRingGeo, photonRingMat);
-  blackHoleGroup.add(photonRing);
-
-  // Inner lensing glow shell (slightly tilted)
-  const lensGeo = new T.TorusGeometry(0.34, 0.028, 8, 64);
-  lensGeo.rotateX(Math.PI / 2.1);
-  const lensMat = new T.MeshBasicMaterial({
-    color: 0xffaa44, transparent: true, opacity: 0.85,
-    blending: T.AdditiveBlending, depthWrite: false
-  });
-  const lensRing = new T.Mesh(lensGeo, lensMat);
-  blackHoleGroup.add(lensRing);
-
-  // Outer accretion disk — 3-arm particle spiral
-  const diskCount = 6000;
-  const diskGeo = new T.BufferGeometry();
-  const diskPos = new Float32Array(diskCount * 3);
-  const diskCol = new Float32Array(diskCount * 3);
-  const diskData = [];
-
-  for (let i = 0; i < diskCount; i++) {
-    const arm = i % 3;
-    const armOffset = (arm * 2 * Math.PI) / 3;
-    const dist = 0.32 + Math.random() * 3.2;
-    const ang = dist * 2.6 + armOffset + (Math.random() - 0.5) * 0.18;
-    const ySpread = (Math.random() - 0.5) * 0.07 * (3.2 - dist);
-    diskData.push({ dist, ang, ySpread, speed: 0.6 + Math.random() * 0.5, arm });
-    diskPos[i*3]   = Math.cos(ang) * dist;
-    diskPos[i*3+1] = ySpread;
-    diskPos[i*3+2] = Math.sin(ang) * dist;
-  }
-
-  diskGeo.setAttribute('position', new T.BufferAttribute(diskPos, 3));
-  diskGeo.setAttribute('color',    new T.BufferAttribute(diskCol, 3));
-
-  const diskMat = new T.PointsMaterial({
-    size: 0.10, vertexColors: true,
-    transparent: true, opacity: 0.9,
-    blending: T.AdditiveBlending, depthWrite: false,
-    map: glowTexture, alphaTest: 0.002
-  });
-  const diskPoints = new T.Points(diskGeo, diskMat);
-  blackHoleGroup.add(diskPoints);
-
-  /* ════════════════════════════════════════════════
-     STARFIELD — dense, multi-color (blue/white/gold)
-  ════════════════════════════════════════════════ */
-  const STAR_COUNT = 2200;
-  const starGeo = new T.BufferGeometry();
-  const starPos = new Float32Array(STAR_COUNT * 3);
-  const starCol = new Float32Array(STAR_COUNT * 3);
-  const starData = [];
-
-  for (let i = 0; i < STAR_COUNT; i++) {
-    const x = (Math.random() - 0.5) * 22;
-    const y = (Math.random() - 0.5) * 16;
-    const z = -18 + Math.random() * 24;
-    starData.push({ x, y, z, speed: 0.3 + Math.random() * 0.6 });
-    starPos[i*3] = x; starPos[i*3+1] = y; starPos[i*3+2] = z;
-
-    // Star type: blue dwarf / white / golden / red giant
-    const type = Math.random();
-    const br = 0.5 + Math.random() * 0.5;
-    if (type < 0.25)      { starCol[i*3]=br*0.7; starCol[i*3+1]=br*0.82; starCol[i*3+2]=br; }       // blue
-    else if (type < 0.55) { starCol[i*3]=br;     starCol[i*3+1]=br;      starCol[i*3+2]=br; }        // white
-    else if (type < 0.75) { starCol[i*3]=br;     starCol[i*3+1]=br*0.88; starCol[i*3+2]=br*0.5; }   // golden
-    else                  { starCol[i*3]=br;     starCol[i*3+1]=br*0.3;  starCol[i*3+2]=br*0.18; }  // red
-  }
-
-  starGeo.setAttribute('position', new T.BufferAttribute(starPos, 3));
-  starGeo.setAttribute('color',    new T.BufferAttribute(starCol, 3));
-  const starMat = new T.PointsMaterial({
-    size: 0.08, vertexColors: true, transparent: true, opacity: 0.95, depthWrite: false,
-    blending: T.AdditiveBlending, map: glowTexture, alphaTest: 0.002
-  });
-  const starField = new T.Points(starGeo, starMat);
-  spaceGroup.add(starField);
-
-  /* ════════════════════════════════════════════════
-     NEBULA CLOUDS — layered additive-blended dust
-  ════════════════════════════════════════════════ */
-  // Create multiple nebula layers with different colors
-  function makeNebula(count, sizeMin, sizeMax, colorA, colorB, spread) {
-    const geo = new T.BufferGeometry();
-    const pos = new Float32Array(count * 3);
-    const col = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      pos[i*3]   = (Math.random()-0.5)*spread.x;
-      pos[i*3+1] = (Math.random()-0.5)*spread.y;
-      pos[i*3+2] = -12 + Math.random()*16;
-      const t = Math.random();
-      col[i*3]   = colorA[0]*(1-t) + colorB[0]*t;
-      col[i*3+1] = colorA[1]*(1-t) + colorB[1]*t;
-      col[i*3+2] = colorA[2]*(1-t) + colorB[2]*t;
-    }
-    geo.setAttribute('position', new T.BufferAttribute(pos, 3));
-    geo.setAttribute('color',    new T.BufferAttribute(col, 3));
-    const mat = new T.PointsMaterial({
-      size: (sizeMin + Math.random()*(sizeMax-sizeMin)) * 1.6,
-      vertexColors: true, transparent: true, opacity: 0.15,
-      blending: T.AdditiveBlending, depthWrite: false,
-      map: glowTexture, alphaTest: 0.001
-    });
-    return new T.Points(geo, mat);
-  }
-
-  const nebula1 = makeNebula(80, 2.5, 4.5, [0.05,0.0,0.18], [0.0,0.08,0.22], {x:14,y:10}); // deep violet/blue
-  const nebula2 = makeNebula(60, 3.0, 5.5, [0.18,0.0,0.06], [0.22,0.05,0.0], {x:12,y:9});  // crimson/orange
-  const nebula3 = makeNebula(50, 2.0, 3.5, [0.0,0.12,0.15], [0.0,0.18,0.08], {x:10,y:8});  // teal/emerald
-  spaceGroup.add(nebula1, nebula2, nebula3);
-
-  // Theme-colored nebula that syncs with UI
-  const themeNebGeo = new T.BufferGeometry();
-  const THEME_NEB_COUNT = 40;
-  const themeNebPos = new Float32Array(THEME_NEB_COUNT * 3);
-  const themeNebCol = new Float32Array(THEME_NEB_COUNT * 3);
-  for (let i = 0; i < THEME_NEB_COUNT; i++) {
-    themeNebPos[i*3]   = (Math.random()-0.5)*10;
-    themeNebPos[i*3+1] = (Math.random()-0.5)*7;
-    themeNebPos[i*3+2] = -8 + Math.random()*12;
-  }
-  themeNebGeo.setAttribute('position', new T.BufferAttribute(themeNebPos, 3));
-  themeNebGeo.setAttribute('color',    new T.BufferAttribute(themeNebCol, 3));
-  const themeNebMat = new T.PointsMaterial({
-    size: 6.0, vertexColors: true, transparent: true, opacity: 0.15,
-    blending: T.AdditiveBlending, depthWrite: false,
-    map: glowTexture, alphaTest: 0.001
-  });
-  const themeNebula = new T.Points(themeNebGeo, themeNebMat);
-  spaceGroup.add(themeNebula);
-
-  /* ════════════════════════════════════════════════
-     PLANETS — Volcanic + Ice Giant with rings
-  ════════════════════════════════════════════════ */
-  const COLLISION_PT = new T.Vector3(1.2, 0.3, -2.0);
-  const START1 = new T.Vector3().addVectors(COLLISION_PT, new T.Vector3(-5.5, 0.6, 0.4));
-  const START2 = new T.Vector3().addVectors(COLLISION_PT, new T.Vector3(5.5, -0.6, -0.5));
-
-  let planet1, planet2, planet1Wire, planet2Rings;
-  let shockwave, debrisPoints, shockGlow;
-  const DEBRIS_COUNT = 280;
-  let debrisGeo, debrisData = [];
-  let planetState = 'approaching', approachT = 0, explTimer = 0, speedMult = 1.0;
-  let targetActivity = 1.0, currentActivity = 1.0;
-
-  function createPlanets() {
-    // ─ Planet 1: Volcanic / Lava ─
-    const p1Geo = new T.SphereGeometry(0.42, 20, 20);
-    const p1Mat = new T.MeshStandardMaterial({
-      color: 0xcc2200, emissive: 0xff3300, emissiveIntensity: 1.4,
-      roughness: 0.95, metalness: 0.05, flatShading: true
-    });
-    planet1 = new T.Mesh(p1Geo, p1Mat);
-    planet1.position.copy(START1);
-    spaceGroup.add(planet1);
-
-    // Wireframe crust (lava crack lines)
-    const p1WireGeo = new T.SphereGeometry(0.435, 10, 10);
-    const p1WireMat = new T.MeshBasicMaterial({
-      color: 0xff6600, wireframe: true, transparent: true, opacity: 0.35,
-      blending: T.AdditiveBlending, depthWrite: false
-    });
-    planet1Wire = new T.Mesh(p1WireGeo, p1WireMat);
-    planet1.add(planet1Wire);
-
-    // Inner lava glow (point light attached to p1)
-    const lavaGlow = new T.PointLight(0xff3300, 1.6, 3.5);
-    planet1.add(lavaGlow);
-
-    // ─ Planet 2: Ice / Gas Giant ─
-    const p2Geo = new T.SphereGeometry(0.32, 24, 24);
-    const p2Mat = new T.MeshStandardMaterial({
-      color: 0x88ddff, emissive: 0x0044aa, emissiveIntensity: 0.8,
-      roughness: 0.18, metalness: 0.85, flatShading: false
-    });
-    planet2 = new T.Mesh(p2Geo, p2Mat);
-    planet2.position.copy(START2);
-    spaceGroup.add(planet2);
-
-    // Orbital rings (two rings, different tilt)
-    planet2Rings = new T.Group();
-    planet2.add(planet2Rings);
-
-    function makeRing(innerR, outerR, color, opacity, tiltX, tiltZ) {
-      const rGeo = new T.RingGeometry(innerR, outerR, 64);
-      const rMat = new T.MeshBasicMaterial({
-        color, side: T.DoubleSide, transparent: true, opacity,
-        blending: T.AdditiveBlending, depthWrite: false
-      });
-      const ring = new T.Mesh(rGeo, rMat);
-      ring.rotation.x = tiltX;
-      ring.rotation.z = tiltZ;
-      planet2Rings.add(ring);
-    }
-    makeRing(0.45, 0.72, 0x88ccff, 0.55, Math.PI/2.3, 0.25);
-    makeRing(0.54, 0.64, 0xffffff, 0.25, Math.PI/2.1, -0.15);
-
-    // ─ Shockwave ring ─
-    const swGeo = new T.TorusGeometry(0.01, 0.022, 8, 64);
-    swGeo.rotateX(Math.PI/2);
-    const swMat = new T.MeshBasicMaterial({
-      color: 0xffffff, transparent: true, opacity: 0,
-      blending: T.AdditiveBlending, depthWrite: false
-    });
-    shockwave = new T.Mesh(swGeo, swMat);
-    shockwave.position.copy(COLLISION_PT);
-    spaceGroup.add(shockwave);
-
-    // Shockwave secondary glow
-    const sgGeo = new T.TorusGeometry(0.01, 0.06, 6, 40);
-    sgGeo.rotateX(Math.PI/2);
-    const sgMat = new T.MeshBasicMaterial({
-      color: 0xff8800, transparent: true, opacity: 0,
-      blending: T.AdditiveBlending, depthWrite: false
-    });
-    shockGlow = new T.Mesh(sgGeo, sgMat);
-    shockGlow.position.copy(COLLISION_PT);
-    spaceGroup.add(shockGlow);
-
-    // ─ Debris / Explosion particles ─
-    debrisGeo = new T.BufferGeometry();
-    const dPos = new Float32Array(DEBRIS_COUNT * 3);
-    const dCol = new Float32Array(DEBRIS_COUNT * 3);
-    for (let i = 0; i < DEBRIS_COUNT; i++) {
-      dPos[i*3] = COLLISION_PT.x;
-      dPos[i*3+1] = COLLISION_PT.y;
-      dPos[i*3+2] = COLLISION_PT.z;
-      debrisData.push({ vx:0, vy:0, vz:0 });
-    }
-    debrisGeo.setAttribute('position', new T.BufferAttribute(dPos, 3));
-    debrisGeo.setAttribute('color',    new T.BufferAttribute(dCol, 3));
-    const dMat = new T.PointsMaterial({
-      size: 0.12, vertexColors: true, transparent: true, opacity: 0,
-      blending: T.AdditiveBlending, depthWrite: false,
-      map: glowTexture, alphaTest: 0.002
-    });
-    debrisPoints = new T.Points(debrisGeo, dMat);
-    spaceGroup.add(debrisPoints);
-  }
-  createPlanets();
-
-  /* ════════════════════════════════════════════════
-     ① GRAVITATIONAL WAVE RIPPLE PLANE
-  ════════════════════════════════════════════════ */
-  const RIPPLE_SEG = 42;
-  const rippleGeo = new T.PlaneGeometry(7.5, 7.5, RIPPLE_SEG, RIPPLE_SEG);
-  rippleGeo.rotateX(-Math.PI / 2);
-  const rippleMat = new T.MeshBasicMaterial({
-    color: 0x00ff88, wireframe: true, transparent: true, opacity: 0.06,
-    blending: T.AdditiveBlending, depthWrite: false
-  });
-  const rippleMesh = new T.Mesh(rippleGeo, rippleMat);
-  rippleMesh.position.set(-1.4, -0.4, 0);
-  spaceGroup.add(rippleMesh);
-
-  /* ════════════════════════════════════════════════
-     ② ASTEROID BELT (60 rocks orbiting black hole)
-  ════════════════════════════════════════════════ */
-  const ASTEROID_COUNT = 60;
-  const asteroidData = [];
-  const asteroidGroup = new T.Group();
-  blackHoleGroup.add(asteroidGroup);
-
-  for (let i = 0; i < ASTEROID_COUNT; i++) {
-    const r = 0.04 + Math.random() * 0.08;
-    const geo = new T.IcosahedronGeometry(r, 0);
-    // Distort verts slightly for rocky look
-    const posA = geo.attributes.position.array;
-    for (let j = 0; j < posA.length; j++) posA[j] += (Math.random() - 0.5) * r * 0.55;
-    geo.attributes.position.needsUpdate = true;
-    geo.computeVertexNormals();
-
-    const isHot = Math.random() < 0.2;
-    const mat = new T.MeshStandardMaterial({
-      color: isHot ? 0x882200 : (0x554433 + Math.floor(Math.random()*0x221100)),
-      emissive: isHot ? 0xff2200 : 0x000000,
-      emissiveIntensity: isHot ? 0.4 : 0,
-      roughness: 0.95, metalness: 0.1, flatShading: true
+  // Helper: create textured sphere with glow
+  function makePlanet(radius, color, emissive, x, y, z) {
+    const geo = new T.SphereGeometry(radius, 48, 48);
+    const mat = new T.MeshPhongMaterial({
+      color, emissive: emissive||0x000000,
+      emissiveIntensity: 0.15,
+      shininess: 40,
     });
     const mesh = new T.Mesh(geo, mat);
-    const orbitR = 3.6 + Math.random() * 1.8;
-    const orbitAng = Math.random() * Math.PI * 2;
-    const orbitY = (Math.random() - 0.5) * 0.6;
-    const orbitTilt = (Math.random() - 0.5) * 0.4;
-    const speed = (0.18 + Math.random() * 0.22) * (Math.random() < 0.5 ? 1 : -1);
-    mesh.position.set(Math.cos(orbitAng)*orbitR, orbitY, Math.sin(orbitAng)*orbitR);
-    asteroidGroup.add(mesh);
-    asteroidData.push({ mesh, orbitR, ang: orbitAng, orbitY, orbitTilt, speed,
-      rotSpd: (Math.random()-0.5)*3.0 });
+    mesh.position.set(x, y, z);
+    scene.add(mesh);
+    return mesh;
   }
 
-  /* ════════════════════════════════════════════════
-     ③ SHOOTING STARS (pool of 12 meteors)
-  ════════════════════════════════════════════════ */
-  const METEOR_POOL = 12;
-  const METEOR_TAIL = 28;
-  const meteorData = [];
-
-  for (let i = 0; i < METEOR_POOL; i++) {
-    const geo = new T.BufferGeometry();
-    const pos = new Float32Array(METEOR_TAIL * 3);
-    const col = new Float32Array(METEOR_TAIL * 3);
-    for (let j = 0; j < METEOR_TAIL; j++) {
-      pos[j*3] = 0; pos[j*3+1] = 0; pos[j*3+2] = 0;
-      const f = 1 - j/METEOR_TAIL;
-      col[j*3]=f; col[j*3+1]=f*0.85; col[j*3+2]=f*0.5;
-    }
-    geo.setAttribute('position', new T.BufferAttribute(pos, 3));
-    geo.setAttribute('color',    new T.BufferAttribute(col, 3));
-    const mat = new T.PointsMaterial({
-      size: 0.10, vertexColors: true, transparent: true, opacity: 0,
-      blending: T.AdditiveBlending, depthWrite: false,
-      map: glowTexture, alphaTest: 0.002
+  // Helper: glow sprite
+  function makeGlow(color, size, x, y, z) {
+    const geo = new T.SphereGeometry(size, 16, 16);
+    const mat = new T.MeshBasicMaterial({
+      color, transparent: true, opacity: 0.09,
+      blending: T.AdditiveBlending, depthWrite: false
     });
-    const pts = new T.Points(geo, mat);
-    scene.add(pts); // in scene not spaceGroup so it doesn't rotate with universe
-    const nextDelay = 2 + i * 1.4 + Math.random() * 4;
-    meteorData.push({
-      pts, geo, active: false, timer: 0, cooldown: nextDelay,
-      x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0,
-      history: Array.from({length: METEOR_TAIL}, () => ({x:0,y:0,z:0}))
-    });
+    const m = new T.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    scene.add(m);
+    return m;
   }
 
-  function spawnMeteor(m) {
-    const side = Math.random() < 0.5 ? -1 : 1;
-    m.x = side * (8 + Math.random() * 3);
-    m.y = 3 + Math.random() * 2;
-    m.z = -6 + Math.random() * 4;
-    const speed = 18 + Math.random() * 12;
-    m.vx = -side * speed * (0.7 + Math.random() * 0.3);
-    m.vy = -(1.5 + Math.random() * 2.5);
-    m.vz = (Math.random() - 0.5) * 4;
-    m.timer = 0;
-    m.active = true;
-    m.pts.material.opacity = 1.0;
-    for (const h of m.history) { h.x = m.x; h.y = m.y; h.z = m.z; }
-  }
-
-
-
-  /* ════════════════════════════════════════════════
-     ⑤ RED DWARF + MOON (permanent orbit)
-  ════════════════════════════════════════════════ */
-  const redDwarfGroup = new T.Group();
-  redDwarfGroup.position.set(3.2, -0.5, 0.8);
-  spaceGroup.add(redDwarfGroup);
-
-  const redDwarf = new T.Mesh(
-    new T.SphereGeometry(0.22, 20, 20),
-    new T.MeshStandardMaterial({
-      color: 0xff5511, emissive: 0xff2200, emissiveIntensity: 1.1,
-      roughness: 0.9, metalness: 0.0, flatShading: true
-    })
-  );
-  redDwarfGroup.add(redDwarf);
-
-  // Atmosphere glow
-  const rdAtmo = new T.Mesh(
-    new T.SphereGeometry(0.28, 16, 16),
-    new T.MeshBasicMaterial({
-      color: 0xff3300, transparent: true, opacity: 0.12,
-      blending: T.AdditiveBlending, depthWrite: false, side: T.BackSide
-    })
-  );
-  redDwarfGroup.add(rdAtmo);
-
-  // Moon
-  const rdMoon = new T.Mesh(
-    new T.SphereGeometry(0.065, 12, 12),
-    new T.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.9, flatShading: true })
-  );
-  rdMoon.position.set(0.52, 0, 0);
-  redDwarfGroup.add(rdMoon);
-  let rdMoonAngle = 0;
-
-  // Point light from red dwarf
-  const rdLight = new T.PointLight(0xff4400, 1.4, 8);
-  redDwarfGroup.add(rdLight);
-
-
-
-  /* ════════════════════════════════════════════════
-     ⑦ CORONA RING (3rd outer ring on black hole)
-  ════════════════════════════════════════════════ */
-  const coronaGeo = new T.TorusGeometry(0.55, 0.012, 6, 80);
-  coronaGeo.rotateX(Math.PI / 2.5);
-  const coronaMat = new T.MeshBasicMaterial({
-    color: 0xff6600, transparent: true, opacity: 0.35,
+  // ── PLANET A — large blue-purple gas giant (right side) ──
+  const pA = makePlanet(3.2, 0x3322aa, 0x1100cc, 7, -1, -2);
+  // Ring for planet A
+  const ringGeo = new T.TorusGeometry(4.8, 0.38, 6, 120);
+  ringGeo.rotateX(Math.PI * 0.32);
+  const ringMat = new T.MeshBasicMaterial({
+    color: 0x7755cc, transparent: true, opacity: 0.45,
     blending: T.AdditiveBlending, depthWrite: false
   });
-  const coronaRing = new T.Mesh(coronaGeo, coronaMat);
-  blackHoleGroup.add(coronaRing);
+  const ringA = new T.Mesh(ringGeo, ringMat);
+  ringA.position.set(7, -1, -2);
+  scene.add(ringA);
+  makeGlow(0x4433ff, 5.5, 7, -1, -2);
 
-  /* ════════════════════════════════════════════════
-     ⑧ LAVA SPOTS on volcanic planet
-  ════════════════════════════════════════════════ */
-  const LAVA_SPOTS = 120;
-  const lavaSpotGeo = new T.BufferGeometry();
-  const lavaSpotPos = new Float32Array(LAVA_SPOTS * 3);
-  const lavaSpotCol = new Float32Array(LAVA_SPOTS * 3);
-  // Distribute on sphere surface
-  for (let i = 0; i < LAVA_SPOTS; i++) {
+  // Bands on planet A
+  for (let i = 0; i < 5; i++) {
+    const bGeo = new T.TorusGeometry(3.2 + 0.02, 0.08 + Math.random()*0.1, 4, 80);
+    bGeo.rotateX(Math.PI/2 + (i - 2) * 0.35);
+    const bMat = new T.MeshBasicMaterial({
+      color: i%2===0 ? 0x5544dd : 0x8855ff,
+      transparent: true, opacity: 0.25,
+      blending: T.AdditiveBlending, depthWrite: false
+    });
+    const bMesh = new T.Mesh(bGeo, bMat);
+    bMesh.position.set(7, -1, -2);
+    scene.add(bMesh);
+  }
+
+  // ── PLANET B — smaller hot reddish world (approaching) ──
+  const pB = makePlanet(1.6, 0xcc3311, 0xaa2200, -12, 4, 4);
+  makeGlow(0xff4400, 3.2, -12, 4, 4);
+
+  // ── PLANET C — distant ice planet ──
+  const pC = makePlanet(1.0, 0x2288cc, 0x115588, -5, -5, -8);
+  makeGlow(0x4499ff, 1.8, -5, -5, -8);
+
+  // ── DEBRIS FIELD ──
+  const debrisGeo = new T.BufferGeometry();
+  const dN = 600;
+  const dPos = new Float32Array(dN * 3);
+  const dCol = new Float32Array(dN * 3);
+  for (let i = 0; i < dN; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const r = 6 + Math.random() * 8;
+    const spread = (Math.random() - 0.5) * 3;
+    dPos[i*3]   = Math.cos(ang) * r + 7;
+    dPos[i*3+1] = spread * 0.25 - 1;
+    dPos[i*3+2] = Math.sin(ang) * r * 0.35 - 2;
+    const hot = Math.random();
+    dCol[i*3]   = 0.5 + hot * 0.5;
+    dCol[i*3+1] = 0.2 + hot * 0.3;
+    dCol[i*3+2] = 0.8 - hot * 0.6;
+  }
+  debrisGeo.setAttribute('position', new T.BufferAttribute(dPos, 3));
+  debrisGeo.setAttribute('color',    new T.BufferAttribute(dCol, 3));
+  scene.add(new T.Points(debrisGeo, new T.PointsMaterial({
+    size: 0.06, vertexColors: true, sizeAttenuation: true,
+    transparent: true, opacity: 0.6,
+    blending: T.AdditiveBlending, depthWrite: false
+  })));
+
+  // ── COLLISION EJECTA — static particle cloud between planets ──
+  const ejectaGeo = new T.BufferGeometry();
+  const eN = 800;
+  const ePos = new Float32Array(eN * 3);
+  const eCol = new Float32Array(eN * 3);
+  for (let i = 0; i < eN; i++) {
     const th = Math.random() * Math.PI * 2;
     const ph = Math.acos(2*Math.random()-1);
-    const r = 0.44;
-    lavaSpotPos[i*3]   = Math.sin(ph)*Math.cos(th)*r;
-    lavaSpotPos[i*3+1] = Math.cos(ph)*r;
-    lavaSpotPos[i*3+2] = Math.sin(ph)*Math.sin(th)*r;
-    lavaSpotCol[i*3]=1; lavaSpotCol[i*3+1]=0.3+Math.random()*0.3; lavaSpotCol[i*3+2]=0;
+    const r  = 1.5 + Math.random() * 4;
+    ePos[i*3]   = 3 + r * Math.sin(ph) * Math.cos(th) * 1.8;
+    ePos[i*3+1] = -1 + r * Math.sin(ph) * Math.sin(th) * 0.7;
+    ePos[i*3+2] = -1 + r * Math.cos(ph) * 0.5;
+    const t = Math.random();
+    eCol[i*3]   = 0.9; eCol[i*3+1] = 0.4 + t*0.4; eCol[i*3+2] = 0.1;
   }
-  lavaSpotGeo.setAttribute('position', new T.BufferAttribute(lavaSpotPos, 3));
-  lavaSpotGeo.setAttribute('color',    new T.BufferAttribute(lavaSpotCol, 3));
-  const lavaSpotMat = new T.PointsMaterial({
-    size: 0.04, vertexColors: true, transparent: true, opacity: 0.85,
+  ejectaGeo.setAttribute('position', new T.BufferAttribute(ePos, 3));
+  ejectaGeo.setAttribute('color',    new T.BufferAttribute(eCol, 3));
+  const ejectaMesh = new T.Points(ejectaGeo, new T.PointsMaterial({
+    size: 0.04, vertexColors: true, sizeAttenuation: true,
+    transparent: true, opacity: 0,
     blending: T.AdditiveBlending, depthWrite: false
-  });
-  const lavaSpots = new T.Points(lavaSpotGeo, lavaSpotMat);
-  // Will be added to planet1 after createPlanets runs — done below
+  }));
+  scene.add(ejectaMesh);
 
-  /* ════════════════════════════════════════════════
-     ⑨ FROST HALO on ice planet (static ring of particles)
-  ════════════════════════════════════════════════ */
-  const FROST_COUNT = 80;
-  const frostGeo = new T.BufferGeometry();
-  const frostPos = new Float32Array(FROST_COUNT * 3);
-  for (let i = 0; i < FROST_COUNT; i++) {
-    const ang = (i / FROST_COUNT) * Math.PI * 2;
-    const r = 0.42 + Math.random()*0.08;
-    frostPos[i*3]   = Math.cos(ang)*r;
-    frostPos[i*3+1] = (Math.random()-0.5)*0.12;
-    frostPos[i*3+2] = Math.sin(ang)*r;
-  }
-  frostGeo.setAttribute('position', new T.BufferAttribute(frostPos, 3));
-  const frostMat = new T.PointsMaterial({
-    color: 0xaaddff, size: 0.025, transparent: true, opacity: 0.6,
-    blending: T.AdditiveBlending, depthWrite: false
-  });
-  const frostHalo = new T.Points(frostGeo, frostMat);
+  // ── COLLISION STATE MACHINE ──
+  let collisionPhase = 'approach'; // approach → impact → ejecta → settle
+  let collisionTimer = 0;
+  const APPROACH_DURATION = 12; // seconds before impact
+  const IMPACT_DURATION   = 0.5;
+  const EJECTA_DURATION   = 4;
+  const SETTLE_DURATION   = 6;
+  let cycleTime = 0;
 
-  // Attach surface effects to planets
-  planet1.add(lavaSpots);
-  planet2.add(frostHalo);
+  // Starting pos of planet B
+  const pB_start = { x: -12, y: 4, z: 4 };
+  const pB_impact = { x: 4.8, y: -0.5, z: -1.5 }; // near planet A
+  const pB_settle = { x: 2, y: 6, z: 0 }; // bounces away
 
-  /* ════════════════════════════════════════════════
-     STAR TWINKLE DATA
-  ════════════════════════════════════════════════ */
-  const starTwinkle = new Float32Array(STAR_COUNT);
-  for (let i = 0; i < STAR_COUNT; i++) starTwinkle[i] = Math.random() * Math.PI * 2; // phase offset
+  let et = 0, lastT = 0;
 
-  /* ════════════════════════════════════════════════
-     THEME COLOR SYNC
-  ════════════════════════════════════════════════ */
-  let lastThemeHex = '';
-  function getThemeColor() {
-    const col = new T.Color();
-    const v = getComputedStyle(document.body).getPropertyValue('--green').trim();
-    col.setStyle(v || '#2d6a4f');
-    return col;
-  }
+  function lerp(a, b, t) { return a + (b - a) * Math.min(1, Math.max(0, t)); }
+  function easeInOut(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
 
-  function syncTheme() {
-    const tc = getThemeColor();
-    const hex = tc.getHexString();
-    if (hex === lastThemeHex) return;
-    lastThemeHex = hex;
-
-    const da = diskGeo.attributes.color.array;
-    for (let i = 0; i < diskCount; i++) {
-      const p = diskData[i];
-      const t = Math.max(0, Math.min(1, (p.dist - 0.32) / 3.2));
-      const c = new T.Color();
-      if (t < 0.18) {
-        c.copy(tc).lerp(new T.Color(0xffffff), 1.0 - t/0.18);
-      } else {
-        c.copy(tc.clone().multiplyScalar(0.1)).lerp(tc, 1.0 - (t-0.18)/0.82);
-      }
-      da[i*3]=c.r; da[i*3+1]=c.g; da[i*3+2]=c.b;
-    }
-    diskGeo.attributes.color.needsUpdate = true;
-    photonRingMat.color.copy(tc).lerp(new T.Color(0xffffff), 0.7);
-    lensMat.color.copy(tc).lerp(new T.Color(0xff8800), 0.5);
-    coronaMat.color.copy(tc).lerp(new T.Color(0xff6600), 0.4);
-    rippleMat.color.copy(tc).lerp(new T.Color(0x00ff88), 0.5);
-
-    const na = themeNebGeo.attributes.color.array;
-    const dimTc = tc.clone().multiplyScalar(0.22);
-    for (let i = 0; i < THEME_NEB_COUNT; i++) {
-      na[i*3]=dimTc.r; na[i*3+1]=dimTc.g; na[i*3+2]=dimTc.b;
-    }
-    themeNebGeo.attributes.color.needsUpdate = true;
-    if (shockwave) shockwave.material.color.copy(tc);
-  }
-
-  new MutationObserver(syncTheme).observe(document.body, { attributes:true, attributeFilter:['class'] });
-
-  /* ════════════════════════════════════════════════
-     COLLISION FSM
-  ════════════════════════════════════════════════ */
-  function triggerExplosion() {
-    planetState = 'exploding';
-    explTimer = 0;
-    shockwave.scale.set(1,1,1); shockwave.material.opacity = 1.0;
-    shockGlow.scale.set(1,1,1); shockGlow.material.opacity = 0.7;
-
-    const dPos = debrisGeo.attributes.position.array;
-    const dCol = debrisGeo.attributes.color.array;
-    const tc = getThemeColor();
-
-    for (let i = 0; i < DEBRIS_COUNT; i++) {
-      dPos[i*3]=COLLISION_PT.x; dPos[i*3+1]=COLLISION_PT.y; dPos[i*3+2]=COLLISION_PT.z;
-      const theta = Math.random()*Math.PI*2, phi = Math.acos(Math.random()*2-1);
-      const spd = 1.5 + Math.random()*3.8;
-      debrisData[i].vx = Math.sin(phi)*Math.cos(theta)*spd;
-      debrisData[i].vy = Math.sin(phi)*Math.sin(theta)*spd;
-      debrisData[i].vz = Math.cos(phi)*spd;
-      const t = Math.random();
-      const c = new T.Color(0xff6600).lerp(t < 0.5 ? tc : new T.Color(0xff2200), t);
-      dCol[i*3]=c.r; dCol[i*3+1]=c.g; dCol[i*3+2]=c.b;
-    }
-    debrisGeo.attributes.position.needsUpdate = true;
-    debrisGeo.attributes.color.needsUpdate = true;
-    debrisPoints.material.opacity = 1.0;
-  }
-
-  function resetPlanets() {
-    planetState = 'approaching'; approachT = 0;
-    planet1.scale.set(1,1,1); planet1.position.copy(START1);
-    planet2.scale.set(1,1,1); planet2.position.copy(START2);
-    shockwave.material.opacity = 0; shockGlow.material.opacity = 0;
-    debrisPoints.material.opacity = 0;
-  }
-
-  /* ════════════════════════════════════════════════
-     ACTIVITY API
-  ════════════════════════════════════════════════ */
-  window._charSet = function(state) {
-    if      (state === 'excited')  { targetActivity = 4.0; speedMult = 2.5; }
-    else if (state === 'curious' || state === 'password') { targetActivity = 2.0; speedMult = 1.5; }
-    else if (state === 'error')   { targetActivity = 7.0; speedMult = 4.0; setTimeout(()=>{ targetActivity=1.0; speedMult=1.0; }, 2200); }
-    else                           { targetActivity = 1.0; speedMult = 1.0; }
-  };
-
-  /* ════════════════════════════════════════════════
-     ANIMATION LOOP
-  ════════════════════════════════════════════════ */
-  const clock = new T.Clock();
-  syncTheme();
-
-  // Camera dolly-in: start far, ease to final position
-  const CAM_START_Z = 14.0, CAM_END_Z = 7.0;
-  camera.position.z = CAM_START_Z;
-  let camDollyT = 0;
-
-  function animate() {
+  function animate(ts) {
     requestAnimationFrame(animate);
-    const dt = Math.min(clock.getDelta(), 0.05);
-    const et = clock.getElapsedTime();
+    const dt = Math.min((ts - lastT) / 1000, 0.05);
+    lastT = ts;
+    et += dt;
+    cycleTime += dt;
+    collisionTimer += dt;
 
-    currentActivity = T.MathUtils.lerp(currentActivity, targetActivity, 0.07);
-    syncTheme();
+    // ─ Collision cycle ─
+    const TOTAL = APPROACH_DURATION + IMPACT_DURATION + EJECTA_DURATION + SETTLE_DURATION;
+    const cycleT = cycleTime % TOTAL;
 
-    // ── Camera dolly-in (first 3 seconds) ──
-    if (camDollyT < 1) {
-      camDollyT = Math.min(1, camDollyT + dt * 0.28);
-      const ease = 1 - Math.pow(1 - camDollyT, 3); // ease-out cubic
-      camera.position.z = CAM_START_Z + (CAM_END_Z - CAM_START_Z) * ease;
-    }
+    if (cycleT < APPROACH_DURATION) {
+      collisionPhase = 'approach';
+      const t = easeInOut(cycleT / APPROACH_DURATION);
+      pB.position.x = lerp(pB_start.x, pB_impact.x, t);
+      pB.position.y = lerp(pB_start.y, pB_impact.y, t);
+      pB.position.z = lerp(pB_start.z, pB_impact.z, t);
+      ejectaMesh.material.opacity = 0;
 
-    // ── Universe breathing ──
-    const breath = 1 + Math.sin(et * 0.22) * 0.003;
-    spaceGroup.scale.set(breath, breath, breath);
+    } else if (cycleT < APPROACH_DURATION + IMPACT_DURATION) {
+      collisionPhase = 'impact';
+      // Flash ejecta
+      ejectaMesh.material.opacity = 0.85;
 
-    // ── Slow scenic rotation ──
-    spaceGroup.rotation.y += 0.006 * dt;
+    } else if (cycleT < APPROACH_DURATION + IMPACT_DURATION + EJECTA_DURATION) {
+      collisionPhase = 'ejecta';
+      const t = (cycleT - APPROACH_DURATION - IMPACT_DURATION) / EJECTA_DURATION;
+      const bounce = easeInOut(t);
+      pB.position.x = lerp(pB_impact.x, pB_settle.x, bounce);
+      pB.position.y = lerp(pB_impact.y, pB_settle.y, bounce);
+      pB.position.z = lerp(pB_impact.z, pB_settle.z, bounce);
+      ejectaMesh.material.opacity = Math.max(0, 0.85 - t * 0.85);
 
-    // ── Starfield flythrough + twinkle ──
-    const sp = starGeo.attributes.position.array;
-    const sc = starGeo.attributes.color.array;
-    for (let i = 0; i < STAR_COUNT; i++) {
-      const s = starData[i];
-      s.z += s.speed * 1.8 * currentActivity * dt;
-      if (s.z > 6) { s.z = -18; s.x=(Math.random()-.5)*22; s.y=(Math.random()-.5)*16; }
-      sp[i*3]=s.x; sp[i*3+1]=s.y; sp[i*3+2]=s.z;
-      // Twinkle: modulate brightness per star
-      const twink = 0.7 + 0.3 * Math.sin(et * 3.5 + starTwinkle[i]);
-      const base = 0.5 + Math.random() * 0.0; // stable base (avoid re-random each frame)
-      sc[i*3]   *= twink; sc[i*3+1] *= twink; sc[i*3+2] *= twink;
-    }
-    starGeo.attributes.position.needsUpdate = true;
-    starGeo.attributes.color.needsUpdate = true;
+    } else {
+      collisionPhase = 'settle';
+      // Planet B drifts while we wait for next cycle
+      const t = (cycleT - APPROACH_DURATION - IMPACT_DURATION - EJECTA_DURATION) / SETTLE_DURATION;
+      pB.position.x = pB_settle.x + Math.sin(et * 0.3) * 0.5;
+      pB.position.y = pB_settle.y + Math.cos(et * 0.25) * 0.3;
+      ejectaMesh.material.opacity = 0;
 
-    // ── Accretion disk swirl ──
-    const dp = diskGeo.attributes.position.array;
-    for (let i = 0; i < diskCount; i++) {
-      const p = diskData[i];
-      const angSpd = (p.speed * 0.38 * currentActivity) / Math.max(0.15, p.dist);
-      p.ang += angSpd * dt;
-      const inflow = 0.06 * currentActivity * (1.25 - Math.min(1, p.dist * 0.38));
-      p.dist -= inflow * dt;
-      if (p.dist < 0.1) { p.dist = 2.8+Math.random()*0.7; p.ang=(p.arm*2*Math.PI)/3+(Math.random()-.5)*0.2; }
-      dp[i*3]   = Math.cos(p.ang)*p.dist;
-      dp[i*3+2] = Math.sin(p.ang)*p.dist;
-    }
-    diskGeo.attributes.position.needsUpdate = true;
-
-    // ── Black hole pulse + corona ──
-    const pulse = 1 + Math.sin(et * 3.2 * currentActivity) * 0.035;
-    horizon.scale.set(pulse, pulse, pulse);
-    photonRing.rotation.z += 0.4 * dt;
-    lensRing.rotation.z   -= 0.25 * dt;
-    coronaRing.rotation.z += 0.08 * dt;
-    photonRingMat.opacity = 0.85 + Math.sin(et*4.5)*0.1;
-    coronaMat.opacity = 0.28 + Math.sin(et*1.8)*0.1;
-
-    // ── Gravitational wave ripple deformation ──
-    const rippleVerts = rippleGeo.attributes.position.array;
-    for (let i = 0; i < rippleVerts.length; i += 3) {
-      const rx = rippleVerts[i], rz = rippleVerts[i+2];
-      const dist2 = Math.sqrt(rx*rx + rz*rz);
-      rippleVerts[i+1] = Math.sin(dist2 * 2.2 - et * 2.5) * 0.18 / (1 + dist2 * 0.6);
-    }
-    rippleGeo.attributes.position.needsUpdate = true;
-    rippleMat.opacity = 0.05 + Math.sin(et*1.2)*0.02;
-
-    // ── Asteroid belt ──
-    for (const a of asteroidData) {
-      a.ang += a.speed * dt;
-      a.mesh.position.x = Math.cos(a.ang) * a.orbitR;
-      a.mesh.position.z = Math.sin(a.ang) * a.orbitR;
-      a.mesh.position.y = a.orbitY + Math.sin(a.ang * 2 + a.orbitTilt) * 0.15;
-      a.mesh.rotation.x += a.rotSpd * dt;
-      a.mesh.rotation.z += a.rotSpd * 0.7 * dt;
-    }
-
-    // ── Shooting stars ──
-    for (const m of meteorData) {
-      if (!m.active) {
-        m.cooldown -= dt;
-        if (m.cooldown <= 0) { spawnMeteor(m); m.cooldown = 4 + Math.random()*8; }
-      } else {
-        m.timer += dt;
-        const life = 0.5 + Math.random()*0; // fixed 0.5s life estimate
-        m.x += m.vx * dt; m.y += m.vy * dt; m.z += m.vz * dt;
-        // Shift history
-        for (let j = METEOR_TAIL-1; j > 0; j--) {
-          m.history[j].x = m.history[j-1].x;
-          m.history[j].y = m.history[j-1].y;
-          m.history[j].z = m.history[j-1].z;
-        }
-        m.history[0].x = m.x; m.history[0].y = m.y; m.history[0].z = m.z;
-        const pa = m.geo.attributes.position.array;
-        for (let j = 0; j < METEOR_TAIL; j++) {
-          pa[j*3]=m.history[j].x; pa[j*3+1]=m.history[j].y; pa[j*3+2]=m.history[j].z;
-        }
-        m.geo.attributes.position.needsUpdate = true;
-        m.pts.material.opacity = Math.max(0, 1 - m.timer / 0.55);
-        if (m.timer > 0.6 || m.x > 12 || m.x < -12) {
-          m.active = false;
-          m.pts.material.opacity = 0;
-        }
+      if (t >= 0.95) {
+        // Reset planet B to start
+        pB.position.set(pB_start.x, pB_start.y, pB_start.z);
       }
     }
 
-    // ── Red dwarf + moon orbit ──
-    redDwarfGroup.rotation.y += 0.08 * dt;
-    rdMoonAngle += 0.55 * dt;
-    rdMoon.position.x = Math.cos(rdMoonAngle) * 0.52;
-    rdMoon.position.z = Math.sin(rdMoonAngle) * 0.52;
-    redDwarf.rotation.y += 0.3 * dt;
+    // Sync glows
+    const glowObjects = scene.children.filter(c => c.material && c.material.opacity === 0.09);
 
+    // Planet A slow rotation
+    pA.rotation.y += 0.003 * dt * 60;
+    ringA.rotation.z += 0.001 * dt * 60;
 
+    // Planet B rotation speeds up on approach
+    const speedFactor = collisionPhase === 'approach' ?
+      0.005 + 0.015 * (easeInOut(Math.min(1, cycleT / APPROACH_DURATION))) : 0.008;
+    pB.rotation.y += speedFactor * dt * 60;
 
-    // ── Nebula multi-speed parallax drift ──
-    nebula1.rotation.z += 0.009 * dt;
-    nebula2.rotation.z -= 0.006 * dt;
-    nebula3.rotation.y += 0.007 * dt;
-    themeNebula.rotation.z += 0.005 * dt;
-    // Nebulas at slightly different y positions for parallax
-    nebula1.position.y = Math.sin(et * 0.11) * 0.08;
-    nebula2.position.y = Math.sin(et * 0.09 + 1.2) * 0.06;
+    // Planet C slow drift
+    pC.rotation.y += 0.002 * dt * 60;
+    pC.position.x = -5 + Math.sin(et * 0.08) * 0.5;
+    pC.position.y = -5 + Math.cos(et * 0.06) * 0.3;
 
-    // ── Planetary approach & collision ──
-    if (planetState === 'approaching') {
-      approachT += dt * 0.07 * speedMult;
-      const eased = approachT < 0.8 ? approachT : 0.8 + (approachT-0.8)*3.5;
-      if (eased >= 1.0) {
-        triggerExplosion();
-      } else {
-        planet1.position.lerpVectors(START1, COLLISION_PT, Math.min(eased,1));
-        planet2.position.lerpVectors(START2, COLLISION_PT, Math.min(eased,1));
-        planet1.rotation.y += 0.6*dt; planet1.rotation.x += 0.15*dt;
-        planet2.rotation.y -= 0.8*dt; planet2.rotation.x += 0.2*dt;
-        if (planet2Rings) planet2Rings.rotation.y += 1.2*dt;
-        if (planet1Wire) planet1Wire.material.opacity = 0.3 + Math.sin(et*12)*0.15;
-        // lava spots pulse
-        lavaSpots.material.opacity = 0.7 + Math.sin(et*8)*0.15;
-        // frost halo rotate
-        frostHalo.rotation.y += 0.5*dt;
-      }
-    } else if (planetState === 'exploding') {
-      explTimer += dt * speedMult;
-      const swScale = 1 + explTimer * 18 * speedMult;
-      shockwave.scale.set(swScale,swScale,swScale);
-      shockGlow.scale.set(swScale*0.7,swScale*0.7,swScale*0.7);
-      shockwave.material.opacity = Math.max(0, 1 - explTimer/1.8);
-      shockGlow.material.opacity = Math.max(0, 0.6 - explTimer/1.4);
-      const frac = Math.max(0, 1 - explTimer/0.35);
-      planet1.scale.set(frac,frac,frac);
-      planet2.scale.set(frac,frac,frac);
-      const dp2 = debrisGeo.attributes.position.array;
-      for (let i = 0; i < DEBRIS_COUNT; i++) {
-        const d = debrisData[i];
-        dp2[i*3]+=d.vx*dt; dp2[i*3+1]+=d.vy*dt; dp2[i*3+2]+=d.vz*dt;
-        const drag = 1-0.55*dt;
-        d.vx*=drag; d.vy*=drag; d.vz*=drag;
-      }
-      debrisGeo.attributes.position.needsUpdate = true;
-      debrisPoints.material.opacity = Math.max(0, 1-explTimer/4.5);
-      if (explTimer >= 5.0) resetPlanets();
-    }
+    // Debris field rotation
+    debrisGeo.attributes.position.array; // keep reference
+    // Gentle camera parallax
+    camera.position.x = Math.sin(et * 0.04) * 0.8;
+    camera.position.y = Math.cos(et * 0.03) * 0.5;
 
     renderer.render(scene, camera);
   }
-  animate();
-
-
-  /* ── Form interaction bindings ── */
-  setTimeout(() => {
-    const bind = (id, s) => { const el = document.getElementById(id); if(el) el.addEventListener('focus', ()=>window._charSet(s)); };
-    bind('l-u','curious'); bind('l-p','password'); bind('l-2fa','curious');
-    bind('r-u','curious'); bind('r-p','password');
-
-    document.querySelectorAll('.auth-field input').forEach(inp => {
-      inp.addEventListener('blur', () => setTimeout(()=>{ if(!document.activeElement?.matches('input')) window._charSet('idle'); }, 200));
-    });
-    document.getElementById('login-btn')?.addEventListener('mouseenter', ()=>window._charSet('excited'));
-    document.getElementById('register-btn')?.addEventListener('mouseenter', ()=>window._charSet('excited'));
-    document.querySelectorAll('.btn-submit').forEach(b => b.addEventListener('mouseleave', ()=>window._charSet('idle')));
-    document.querySelectorAll('.auth-tab').forEach(tab => {
-      tab.addEventListener('click', ()=>window._charSet('excited'));
-      tab.addEventListener('mouseenter', ()=>window._charSet('curious'));
-      tab.addEventListener('mouseleave', ()=>window._charSet('idle'));
-    });
-  }, 800);
+  animate(0);
 
   window.addEventListener('resize', () => {
     W = window.innerWidth; H = window.innerHeight;
     renderer.setSize(W, H);
-    camera.aspect = W/H;
+    camera.aspect = W / H;
     camera.updateProjectionMatrix();
-    positionBlackHole();
+  });
+})();
+</script>
+
+<!-- ═══ BLACK HOLE (background) ═══ -->
+<script>
+(function() {
+  if (!window.THREE) return;
+  const T = THREE;
+  const canvas = document.getElementById('bh-canvas');
+  let W = window.innerWidth, H = window.innerHeight;
+
+  const renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(W, H);
+  renderer.setClearColor(0x020008, 1);
+
+  const scene = new T.Scene();
+  const camera = new T.PerspectiveCamera(42, W / H, 0.01, 500);
+  camera.position.set(0, 1.6, 9.5);
+  camera.lookAt(0, 0, 0);
+
+  scene.add(new T.AmbientLight(0x000008, 1.0));
+  const bhLight = new T.PointLight(0xff7700, 4.0, 18);
+  scene.add(bhLight);
+  const blueLight = new T.PointLight(0x3366ff, 2.0, 14);
+  blueLight.position.set(-3, 0.4, 2); scene.add(blueLight);
+
+  function makeStars(count, spread, size) {
+    const geo = new T.BufferGeometry();
+    const pos = new Float32Array(count * 3);
+    const col = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      const th = Math.random() * Math.PI * 2;
+      const ph = Math.acos(2 * Math.random() - 1);
+      const r  = spread * (0.6 + Math.random() * 0.4);
+      pos[i*3]   = r * Math.sin(ph) * Math.cos(th);
+      pos[i*3+1] = r * Math.sin(ph) * Math.sin(th);
+      pos[i*3+2] = r * Math.cos(ph);
+      const t = Math.random();
+      if (t < .12)     { col[i*3]=.55; col[i*3+1]=.7;  col[i*3+2]=1.0; }
+      else if (t < .2) { col[i*3]=1.0; col[i*3+1]=.82; col[i*3+2]=.5; }
+      else             { col[i*3]=.88; col[i*3+1]=.88; col[i*3+2]=.88; }
+    }
+    geo.setAttribute('position', new T.BufferAttribute(pos, 3));
+    geo.setAttribute('color',    new T.BufferAttribute(col, 3));
+    return new T.Points(geo, new T.PointsMaterial({
+      size, vertexColors: true, sizeAttenuation: true,
+      transparent: true, opacity: .85, blending: T.AdditiveBlending, depthWrite: false
+    }));
+  }
+  const stars1 = makeStars(9000, 180, .07);
+  const stars2 = makeStars(2500, 70,  .04);
+  scene.add(stars1, stars2);
+
+  // Nebulae
+  [[-20, 8, -65, 60, .18, 0x110022],[18,-5,-75,50,.14,0x001122],[0,-14,-55,42,.10,0x210010]].forEach(([x,y,z,s,o,c])=>{
+    const m = new T.Mesh(
+      new T.PlaneGeometry(s, s*.6),
+      new T.MeshBasicMaterial({ color:c, transparent:true, opacity:o, blending:T.AdditiveBlending, depthWrite:false, side:T.DoubleSide })
+    );
+    m.position.set(x,y,z); m.rotation.z = Math.random()*Math.PI; scene.add(m);
+  });
+
+  // Black hole group — positioned far right (behind the planet scene)
+  const bhGroup = new T.Group();
+  scene.add(bhGroup);
+  function posBH() {
+    bhGroup.position.set(W > 960 ? -2.2 : 0, W > 960 ? 0.1 : 0.4, -2);
+    bhGroup.scale.setScalar(0.7);
+  }
+  posBH();
+
+  const diskGroup = new T.Group();
+  diskGroup.rotation.x = 0.27;
+  bhGroup.add(diskGroup);
+
+  bhGroup.add(new T.Mesh(new T.SphereGeometry(0.43, 48, 48), new T.MeshBasicMaterial({ color: 0x000000 })));
+  const horizon = new T.Mesh(new T.SphereGeometry(0.38, 96, 96), new T.MeshBasicMaterial({ color: 0x000000 }));
+  bhGroup.add(horizon);
+
+  const DN = 10000;
+  const dGeo = new T.BufferGeometry();
+  const dP = new Float32Array(DN * 3);
+  const dC = new Float32Array(DN * 3);
+  const dS = new Float32Array(DN);
+  const dData = [];
+
+  for (let i = 0; i < DN; i++) {
+    const arm  = i % 3;
+    const dist = .55 + Math.random() * 2.5;
+    const ang  = (arm * 2 * Math.PI / 3) + (Math.random() - .5) * .9 + dist * .35;
+    const spd  = .42 + .75 / Math.max(.25, dist);
+    const y    = (Math.random() - .5) * .035 * (1 / dist);
+    dP[i*3] = Math.cos(ang)*dist; dP[i*3+1] = y; dP[i*3+2] = Math.sin(ang)*dist;
+    const heat  = Math.max(0, 1 - (dist - .55) / 2.5);
+    const vx    = -Math.sin(ang) * spd;
+    const dop   = Math.max(-1, Math.min(1, vx / 1.1));
+    let r, g, b;
+    if (heat > .72)          { r=1;   g=.96;  b=.88; }
+    else if (dop > .08)      { r=.35-dop*.25; g=.6+dop*.3; b=1.0; }
+    else if (dop < -.08)     { r=1.0; g=.28+heat*.45; b=.05+heat*.2; }
+    else                     { r=1.0; g=.52+heat*.35; b=.1+heat*.38; }
+    dC[i*3]=r; dC[i*3+1]=g; dC[i*3+2]=b;
+    dS[i] = (.011 + Math.random()*.017) * (1 + heat * .5);
+    dData.push({ dist, ang, y, spd, arm });
+  }
+
+  dGeo.setAttribute('position', new T.BufferAttribute(dP, 3));
+  dGeo.setAttribute('color',    new T.BufferAttribute(dC, 3));
+  dGeo.setAttribute('size',     new T.BufferAttribute(dS, 1));
+  diskGroup.add(new T.Points(dGeo, new T.PointsMaterial({
+    size: .022, vertexColors: true, sizeAttenuation: true,
+    transparent: true, opacity: .88, blending: T.AdditiveBlending, depthWrite: false
+  })));
+
+  const phRingGeo = new T.TorusGeometry(.425, .013, 8, 200);
+  phRingGeo.rotateX(Math.PI / 2);
+  const phRingMat = new T.MeshBasicMaterial({ color: 0xfff5dd, transparent: true, opacity: 1.0, blending: T.AdditiveBlending, depthWrite: false });
+  const phRing = new T.Mesh(phRingGeo, phRingMat);
+  bhGroup.add(phRing);
+
+  bhGroup.add(new T.Mesh(
+    (() => { const g = new T.TorusGeometry(.468, .007, 8, 160); g.rotateX(Math.PI/2); return g; })(),
+    new T.MeshBasicMaterial({ color: 0xffcc88, transparent: true, opacity: .5, blending: T.AdditiveBlending, depthWrite: false })
+  ));
+
+  [[.54, .04, 0xff8822, .3],[.64, .09, 0xff5500, .1]].forEach(([r, t, c, o]) => {
+    const g = new T.TorusGeometry(r, t, 6, 120); g.rotateX(Math.PI/2);
+    bhGroup.add(new T.Mesh(g, new T.MeshBasicMaterial({ color: c, transparent: true, opacity: o, blending: T.AdditiveBlending, depthWrite: false })));
+  });
+
+  const ripGeo = new T.PlaneGeometry(16, 16, 100, 100);
+  ripGeo.rotateX(-Math.PI / 2);
+  const ripMat = new T.MeshBasicMaterial({ color:0x2233aa, wireframe:true, transparent:true, opacity:.025 });
+  const ripMesh = new T.Mesh(ripGeo, ripMat);
+  ripMesh.position.y = -1.3;
+  bhGroup.add(ripMesh);
+
+  let et = 0, lastT = 0;
+
+  function animate(ts) {
+    requestAnimationFrame(animate);
+    const dt = Math.min((ts - lastT) / 1000, .05);
+    lastT = ts; et += dt;
+
+    bhGroup.rotation.y += .0038 * dt * 60;
+
+    const dp = dGeo.attributes.position.array;
+    const dc = dGeo.attributes.color.array;
+    for (let i = 0; i < DN; i++) {
+      const p = dData[i];
+      p.ang += (p.spd / Math.max(.08, p.dist)) * dt;
+      p.dist -= .0026 * dt * (1.5 - Math.min(1.2, p.dist * .55));
+      if (p.dist < .43) { p.dist = 2.0 + Math.random()*.95; p.ang = (p.arm*2*Math.PI/3) + (Math.random()-.5)*.5; }
+      dp[i*3] = Math.cos(p.ang)*p.dist; dp[i*3+1] = p.y; dp[i*3+2] = Math.sin(p.ang)*p.dist;
+      const vx  = -Math.sin(p.ang) * p.spd / Math.max(.08, p.dist);
+      const dop = Math.max(-1, Math.min(1, vx / 1.1));
+      const ht  = Math.max(0, 1-(p.dist-.55)/2.5);
+      let r,g,b;
+      if (ht>.72)      { r=1;  g=.96; b=.88; }
+      else if(dop>.08) { r=.35-dop*.25; g=.6+dop*.3; b=1; }
+      else if(dop<-.08){ r=1;  g=.28+ht*.45; b=.05+ht*.2; }
+      else             { r=1;  g=.52+ht*.35;  b=.1+ht*.38; }
+      dc[i*3]=r; dc[i*3+1]=g; dc[i*3+2]=b;
+    }
+    dGeo.attributes.position.needsUpdate = true;
+    dGeo.attributes.color.needsUpdate = true;
+
+    const pulse = 1 + Math.sin(et * 3.6) * .022;
+    phRing.scale.set(pulse, pulse, pulse);
+    phRingMat.opacity = .85 + Math.sin(et * 5.1) * .09;
+
+    const rv = ripGeo.attributes.position.array;
+    for (let i = 0; i < rv.length; i += 3) {
+      const d = Math.sqrt(rv[i]*rv[i] + rv[i+2]*rv[i+2]);
+      rv[i+1] = Math.sin(d * 1.75 - et * 2.1) * .14 / (1 + d * .45);
+    }
+    ripGeo.attributes.position.needsUpdate = true;
+    ripMat.opacity = .024 + Math.sin(et * 1.3) * .008;
+
+    stars1.rotation.y += .00006; stars2.rotation.y -= .00003;
+    camera.position.x = Math.sin(et * .065) * .12;
+    camera.position.y = 1.6 + Math.cos(et * .048) * .06;
+
+    renderer.render(scene, camera);
+  }
+  animate(0);
+
+  window.addEventListener('resize', () => {
+    W = window.innerWidth; H = window.innerHeight;
+    renderer.setSize(W, H);
+    camera.aspect = W / H;
+    camera.updateProjectionMatrix();
+    posBH();
   });
 })();
 </script>
