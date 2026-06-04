@@ -117,7 +117,12 @@
     font-family: var(--font-head); font-size: 1.9rem; font-weight: 900;
     color: var(--text); letter-spacing: -.04em; line-height: 1;
   }
-  .auth-left .brand-name span { color: var(--green); }
+  .auth-left .brand-name span {
+    background: linear-gradient(135deg, var(--green) 0%, var(--green-m) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+  }
   .auth-left .brand-sub { font-size: .8rem; font-weight: 500; color: var(--text2); margin-top: 3px; }
 
   /* Stat chips — glass effect so 3D scene shows through */
@@ -152,10 +157,14 @@
     background: var(--card); border: 1px solid var(--border);
     border-radius: var(--r-md); padding: 12px 8px;
     text-align: center;
-    transition: transform .2s, box-shadow .2s;
+    transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s, border-color .25s;
     cursor: default;
   }
-  .stat-chip:hover { transform: translateY(-2px); box-shadow: var(--sh2); }
+  .stat-chip:hover {
+    transform: translateY(-4px) scale(1.04);
+    box-shadow: var(--sh2), 0 4px 15px var(--green-l2);
+    border-color: var(--green);
+  }
   .stat-chip .sn {
     display: block; font-family: var(--font-head);
     font-size: 1.15rem; font-weight: 900; color: var(--green);
@@ -182,13 +191,18 @@
     width: 100%; max-width: 385px;
     background: var(--card); border: 1px solid var(--border);
     border-radius: var(--r-2xl); padding: 36px 32px;
-    box-shadow: var(--sh3);
+    box-shadow: var(--sh3), 0 0 35px var(--green-l2);
     animation: cardIn .75s cubic-bezier(.22,1,.36,1) both;
     position: relative; overflow: hidden;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(14px);
+    transition: box-shadow 0.4s ease, border-color 0.4s ease;
+  }
+  .auth-card:hover {
+    box-shadow: var(--sh3), 0 0 50px var(--green-l);
+    border-color: var(--green-m);
   }
   .auth-card::before {
-    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    content:''; position:absolute; top:0; left:0; right:0; height:3.5px;
     background: linear-gradient(90deg, var(--green-h), var(--green-m), var(--accent));
     border-radius: var(--r-2xl) var(--r-2xl) 0 0;
   }
@@ -289,13 +303,23 @@
     background:var(--card2); border:1.5px solid var(--border);
     border-radius:var(--r-md);
     font-family:var(--font-body); font-size:.9rem; color:var(--text);
-    outline:none; transition:border-color .2s, background .2s, box-shadow .2s;
+    outline:none; transition:border-color .25s, background .25s, box-shadow .25s;
     -webkit-appearance:none;
   }
-  .field-wrap input::placeholder { color:var(--text2); opacity:.5; }
+  .field-wrap input::placeholder { color:var(--text2); opacity:.45; }
   .field-wrap input:focus {
     border-color:var(--green); background:var(--card);
-    box-shadow:0 0 0 3px var(--green-l);
+    box-shadow: 0 0 0 3px var(--green-l), 0 0 12px var(--green-l2);
+  }
+  .field-icon {
+    position:absolute; left:13px; top:50%;
+    transform:translateY(-50%);
+    color:var(--text2); font-size:.82rem;
+    pointer-events:none; transition:color .25s, transform .25s;
+  }
+  .field-wrap:focus-within .field-icon {
+    color:var(--green);
+    transform:translateY(-50%) scale(1.15);
   }
   .field-wrap input:-webkit-autofill {
     -webkit-box-shadow:0 0 0 40px var(--card2) inset !important;
@@ -327,10 +351,16 @@
     cursor:pointer; letter-spacing:.01em;
     display:flex; align-items:center; justify-content:center; gap:8px;
     box-shadow:0 4px 20px var(--green-l2);
-    transition:transform .18s, box-shadow .18s;
+    transition:transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
     position:relative; overflow:hidden; margin-top:6px;
   }
-  .btn-submit:hover { transform:translateY(-2px); box-shadow:0 8px 28px var(--green-l2); }
+  .btn-submit:hover {
+    transform:translateY(-3px) scale(1.015);
+    box-shadow:0 8px 28px var(--green-l2), 0 0 16px var(--green-m);
+  }
+  .btn-submit:active {
+    transform:translateY(-1px) scale(0.985);
+  }
   .btn-submit:active { transform:translateY(0); }
   .btn-submit::after {
     content:''; position:absolute; inset:0;
@@ -374,8 +404,10 @@
     .auth-right { padding:20px 14px; padding-top:42px; }
     .auth-card { padding:26px 18px; border-radius:var(--r-xl); }
   }
-  ::-webkit-scrollbar{width:5px;}
-  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--green-m);border-radius:10px;transition:background 0.2s;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--green);}
 </style>
 </head>
 <body>
@@ -573,6 +605,23 @@ function handleRegisterClick() {
   const canvas = document.getElementById('galaxy-canvas');
   let W = window.innerWidth, H = window.innerHeight;
 
+  /* ─ Glowing Dot Texture Generator ─ */
+  function createGlowTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 32;
+    canvas.height = 32;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+    grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    grad.addColorStop(0.2, 'rgba(255, 255, 255, 0.8)');
+    grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.22)');
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 32, 32);
+    return new T.CanvasTexture(canvas);
+  }
+  const glowTexture = createGlowTexture();
+
   /* ─ Renderer ─ */
   const renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -665,9 +714,10 @@ function handleRegisterClick() {
   diskGeo.setAttribute('color',    new T.BufferAttribute(diskCol, 3));
 
   const diskMat = new T.PointsMaterial({
-    size: 0.055, vertexColors: true,
-    transparent: true, opacity: 1.0,
-    blending: T.AdditiveBlending, depthWrite: false
+    size: 0.10, vertexColors: true,
+    transparent: true, opacity: 0.9,
+    blending: T.AdditiveBlending, depthWrite: false,
+    map: glowTexture, alphaTest: 0.002
   });
   const diskPoints = new T.Points(diskGeo, diskMat);
   blackHoleGroup.add(diskPoints);
@@ -700,8 +750,8 @@ function handleRegisterClick() {
   starGeo.setAttribute('position', new T.BufferAttribute(starPos, 3));
   starGeo.setAttribute('color',    new T.BufferAttribute(starCol, 3));
   const starMat = new T.PointsMaterial({
-    size: 0.038, vertexColors: true, transparent: true, opacity: 1.0, depthWrite: false,
-    blending: T.AdditiveBlending
+    size: 0.08, vertexColors: true, transparent: true, opacity: 0.95, depthWrite: false,
+    blending: T.AdditiveBlending, map: glowTexture, alphaTest: 0.002
   });
   const starField = new T.Points(starGeo, starMat);
   spaceGroup.add(starField);
@@ -726,9 +776,10 @@ function handleRegisterClick() {
     geo.setAttribute('position', new T.BufferAttribute(pos, 3));
     geo.setAttribute('color',    new T.BufferAttribute(col, 3));
     const mat = new T.PointsMaterial({
-      size: sizeMin + Math.random()*(sizeMax-sizeMin),
-      vertexColors: true, transparent: true, opacity: 0.22,
-      blending: T.AdditiveBlending, depthWrite: false
+      size: (sizeMin + Math.random()*(sizeMax-sizeMin)) * 1.6,
+      vertexColors: true, transparent: true, opacity: 0.15,
+      blending: T.AdditiveBlending, depthWrite: false,
+      map: glowTexture, alphaTest: 0.001
     });
     return new T.Points(geo, mat);
   }
@@ -751,8 +802,9 @@ function handleRegisterClick() {
   themeNebGeo.setAttribute('position', new T.BufferAttribute(themeNebPos, 3));
   themeNebGeo.setAttribute('color',    new T.BufferAttribute(themeNebCol, 3));
   const themeNebMat = new T.PointsMaterial({
-    size: 4.5, vertexColors: true, transparent: true, opacity: 0.22,
-    blending: T.AdditiveBlending, depthWrite: false
+    size: 6.0, vertexColors: true, transparent: true, opacity: 0.15,
+    blending: T.AdditiveBlending, depthWrite: false,
+    map: glowTexture, alphaTest: 0.001
   });
   const themeNebula = new T.Points(themeNebGeo, themeNebMat);
   spaceGroup.add(themeNebula);
@@ -858,13 +910,223 @@ function handleRegisterClick() {
     debrisGeo.setAttribute('position', new T.BufferAttribute(dPos, 3));
     debrisGeo.setAttribute('color',    new T.BufferAttribute(dCol, 3));
     const dMat = new T.PointsMaterial({
-      size: 0.065, vertexColors: true, transparent: true, opacity: 0,
-      blending: T.AdditiveBlending, depthWrite: false
+      size: 0.12, vertexColors: true, transparent: true, opacity: 0,
+      blending: T.AdditiveBlending, depthWrite: false,
+      map: glowTexture, alphaTest: 0.002
     });
     debrisPoints = new T.Points(debrisGeo, dMat);
     spaceGroup.add(debrisPoints);
   }
   createPlanets();
+
+  /* ════════════════════════════════════════════════
+     ① GRAVITATIONAL WAVE RIPPLE PLANE
+  ════════════════════════════════════════════════ */
+  const RIPPLE_SEG = 42;
+  const rippleGeo = new T.PlaneGeometry(7.5, 7.5, RIPPLE_SEG, RIPPLE_SEG);
+  rippleGeo.rotateX(-Math.PI / 2);
+  const rippleMat = new T.MeshBasicMaterial({
+    color: 0x00ff88, wireframe: true, transparent: true, opacity: 0.06,
+    blending: T.AdditiveBlending, depthWrite: false
+  });
+  const rippleMesh = new T.Mesh(rippleGeo, rippleMat);
+  rippleMesh.position.set(-1.4, -0.4, 0);
+  spaceGroup.add(rippleMesh);
+
+  /* ════════════════════════════════════════════════
+     ② ASTEROID BELT (60 rocks orbiting black hole)
+  ════════════════════════════════════════════════ */
+  const ASTEROID_COUNT = 60;
+  const asteroidData = [];
+  const asteroidGroup = new T.Group();
+  blackHoleGroup.add(asteroidGroup);
+
+  for (let i = 0; i < ASTEROID_COUNT; i++) {
+    const r = 0.04 + Math.random() * 0.08;
+    const geo = new T.IcosahedronGeometry(r, 0);
+    // Distort verts slightly for rocky look
+    const posA = geo.attributes.position.array;
+    for (let j = 0; j < posA.length; j++) posA[j] += (Math.random() - 0.5) * r * 0.55;
+    geo.attributes.position.needsUpdate = true;
+    geo.computeVertexNormals();
+
+    const isHot = Math.random() < 0.2;
+    const mat = new T.MeshStandardMaterial({
+      color: isHot ? 0x882200 : (0x554433 + Math.floor(Math.random()*0x221100)),
+      emissive: isHot ? 0xff2200 : 0x000000,
+      emissiveIntensity: isHot ? 0.4 : 0,
+      roughness: 0.95, metalness: 0.1, flatShading: true
+    });
+    const mesh = new T.Mesh(geo, mat);
+    const orbitR = 3.6 + Math.random() * 1.8;
+    const orbitAng = Math.random() * Math.PI * 2;
+    const orbitY = (Math.random() - 0.5) * 0.6;
+    const orbitTilt = (Math.random() - 0.5) * 0.4;
+    const speed = (0.18 + Math.random() * 0.22) * (Math.random() < 0.5 ? 1 : -1);
+    mesh.position.set(Math.cos(orbitAng)*orbitR, orbitY, Math.sin(orbitAng)*orbitR);
+    asteroidGroup.add(mesh);
+    asteroidData.push({ mesh, orbitR, ang: orbitAng, orbitY, orbitTilt, speed,
+      rotSpd: (Math.random()-0.5)*3.0 });
+  }
+
+  /* ════════════════════════════════════════════════
+     ③ SHOOTING STARS (pool of 12 meteors)
+  ════════════════════════════════════════════════ */
+  const METEOR_POOL = 12;
+  const METEOR_TAIL = 28;
+  const meteorData = [];
+
+  for (let i = 0; i < METEOR_POOL; i++) {
+    const geo = new T.BufferGeometry();
+    const pos = new Float32Array(METEOR_TAIL * 3);
+    const col = new Float32Array(METEOR_TAIL * 3);
+    for (let j = 0; j < METEOR_TAIL; j++) {
+      pos[j*3] = 0; pos[j*3+1] = 0; pos[j*3+2] = 0;
+      const f = 1 - j/METEOR_TAIL;
+      col[j*3]=f; col[j*3+1]=f*0.85; col[j*3+2]=f*0.5;
+    }
+    geo.setAttribute('position', new T.BufferAttribute(pos, 3));
+    geo.setAttribute('color',    new T.BufferAttribute(col, 3));
+    const mat = new T.PointsMaterial({
+      size: 0.10, vertexColors: true, transparent: true, opacity: 0,
+      blending: T.AdditiveBlending, depthWrite: false,
+      map: glowTexture, alphaTest: 0.002
+    });
+    const pts = new T.Points(geo, mat);
+    scene.add(pts); // in scene not spaceGroup so it doesn't rotate with universe
+    const nextDelay = 2 + i * 1.4 + Math.random() * 4;
+    meteorData.push({
+      pts, geo, active: false, timer: 0, cooldown: nextDelay,
+      x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0,
+      history: Array.from({length: METEOR_TAIL}, () => ({x:0,y:0,z:0}))
+    });
+  }
+
+  function spawnMeteor(m) {
+    const side = Math.random() < 0.5 ? -1 : 1;
+    m.x = side * (8 + Math.random() * 3);
+    m.y = 3 + Math.random() * 2;
+    m.z = -6 + Math.random() * 4;
+    const speed = 18 + Math.random() * 12;
+    m.vx = -side * speed * (0.7 + Math.random() * 0.3);
+    m.vy = -(1.5 + Math.random() * 2.5);
+    m.vz = (Math.random() - 0.5) * 4;
+    m.timer = 0;
+    m.active = true;
+    m.pts.material.opacity = 1.0;
+    for (const h of m.history) { h.x = m.x; h.y = m.y; h.z = m.z; }
+  }
+
+
+
+  /* ════════════════════════════════════════════════
+     ⑤ RED DWARF + MOON (permanent orbit)
+  ════════════════════════════════════════════════ */
+  const redDwarfGroup = new T.Group();
+  redDwarfGroup.position.set(3.2, -0.5, 0.8);
+  spaceGroup.add(redDwarfGroup);
+
+  const redDwarf = new T.Mesh(
+    new T.SphereGeometry(0.22, 20, 20),
+    new T.MeshStandardMaterial({
+      color: 0xff5511, emissive: 0xff2200, emissiveIntensity: 1.1,
+      roughness: 0.9, metalness: 0.0, flatShading: true
+    })
+  );
+  redDwarfGroup.add(redDwarf);
+
+  // Atmosphere glow
+  const rdAtmo = new T.Mesh(
+    new T.SphereGeometry(0.28, 16, 16),
+    new T.MeshBasicMaterial({
+      color: 0xff3300, transparent: true, opacity: 0.12,
+      blending: T.AdditiveBlending, depthWrite: false, side: T.BackSide
+    })
+  );
+  redDwarfGroup.add(rdAtmo);
+
+  // Moon
+  const rdMoon = new T.Mesh(
+    new T.SphereGeometry(0.065, 12, 12),
+    new T.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.9, flatShading: true })
+  );
+  rdMoon.position.set(0.52, 0, 0);
+  redDwarfGroup.add(rdMoon);
+  let rdMoonAngle = 0;
+
+  // Point light from red dwarf
+  const rdLight = new T.PointLight(0xff4400, 1.4, 8);
+  redDwarfGroup.add(rdLight);
+
+
+
+  /* ════════════════════════════════════════════════
+     ⑦ CORONA RING (3rd outer ring on black hole)
+  ════════════════════════════════════════════════ */
+  const coronaGeo = new T.TorusGeometry(0.55, 0.012, 6, 80);
+  coronaGeo.rotateX(Math.PI / 2.5);
+  const coronaMat = new T.MeshBasicMaterial({
+    color: 0xff6600, transparent: true, opacity: 0.35,
+    blending: T.AdditiveBlending, depthWrite: false
+  });
+  const coronaRing = new T.Mesh(coronaGeo, coronaMat);
+  blackHoleGroup.add(coronaRing);
+
+  /* ════════════════════════════════════════════════
+     ⑧ LAVA SPOTS on volcanic planet
+  ════════════════════════════════════════════════ */
+  const LAVA_SPOTS = 120;
+  const lavaSpotGeo = new T.BufferGeometry();
+  const lavaSpotPos = new Float32Array(LAVA_SPOTS * 3);
+  const lavaSpotCol = new Float32Array(LAVA_SPOTS * 3);
+  // Distribute on sphere surface
+  for (let i = 0; i < LAVA_SPOTS; i++) {
+    const th = Math.random() * Math.PI * 2;
+    const ph = Math.acos(2*Math.random()-1);
+    const r = 0.44;
+    lavaSpotPos[i*3]   = Math.sin(ph)*Math.cos(th)*r;
+    lavaSpotPos[i*3+1] = Math.cos(ph)*r;
+    lavaSpotPos[i*3+2] = Math.sin(ph)*Math.sin(th)*r;
+    lavaSpotCol[i*3]=1; lavaSpotCol[i*3+1]=0.3+Math.random()*0.3; lavaSpotCol[i*3+2]=0;
+  }
+  lavaSpotGeo.setAttribute('position', new T.BufferAttribute(lavaSpotPos, 3));
+  lavaSpotGeo.setAttribute('color',    new T.BufferAttribute(lavaSpotCol, 3));
+  const lavaSpotMat = new T.PointsMaterial({
+    size: 0.04, vertexColors: true, transparent: true, opacity: 0.85,
+    blending: T.AdditiveBlending, depthWrite: false
+  });
+  const lavaSpots = new T.Points(lavaSpotGeo, lavaSpotMat);
+  // Will be added to planet1 after createPlanets runs — done below
+
+  /* ════════════════════════════════════════════════
+     ⑨ FROST HALO on ice planet (static ring of particles)
+  ════════════════════════════════════════════════ */
+  const FROST_COUNT = 80;
+  const frostGeo = new T.BufferGeometry();
+  const frostPos = new Float32Array(FROST_COUNT * 3);
+  for (let i = 0; i < FROST_COUNT; i++) {
+    const ang = (i / FROST_COUNT) * Math.PI * 2;
+    const r = 0.42 + Math.random()*0.08;
+    frostPos[i*3]   = Math.cos(ang)*r;
+    frostPos[i*3+1] = (Math.random()-0.5)*0.12;
+    frostPos[i*3+2] = Math.sin(ang)*r;
+  }
+  frostGeo.setAttribute('position', new T.BufferAttribute(frostPos, 3));
+  const frostMat = new T.PointsMaterial({
+    color: 0xaaddff, size: 0.025, transparent: true, opacity: 0.6,
+    blending: T.AdditiveBlending, depthWrite: false
+  });
+  const frostHalo = new T.Points(frostGeo, frostMat);
+
+  // Attach surface effects to planets
+  planet1.add(lavaSpots);
+  planet2.add(frostHalo);
+
+  /* ════════════════════════════════════════════════
+     STAR TWINKLE DATA
+  ════════════════════════════════════════════════ */
+  const starTwinkle = new Float32Array(STAR_COUNT);
+  for (let i = 0; i < STAR_COUNT; i++) starTwinkle[i] = Math.random() * Math.PI * 2; // phase offset
 
   /* ════════════════════════════════════════════════
      THEME COLOR SYNC
@@ -883,7 +1145,6 @@ function handleRegisterClick() {
     if (hex === lastThemeHex) return;
     lastThemeHex = hex;
 
-    // Accretion disk colors
     const da = diskGeo.attributes.color.array;
     for (let i = 0; i < diskCount; i++) {
       const p = diskData[i];
@@ -897,19 +1158,17 @@ function handleRegisterClick() {
       da[i*3]=c.r; da[i*3+1]=c.g; da[i*3+2]=c.b;
     }
     diskGeo.attributes.color.needsUpdate = true;
-
-    // Photon ring tint
     photonRingMat.color.copy(tc).lerp(new T.Color(0xffffff), 0.7);
     lensMat.color.copy(tc).lerp(new T.Color(0xff8800), 0.5);
+    coronaMat.color.copy(tc).lerp(new T.Color(0xff6600), 0.4);
+    rippleMat.color.copy(tc).lerp(new T.Color(0x00ff88), 0.5);
 
-    // Theme nebula
     const na = themeNebGeo.attributes.color.array;
     const dimTc = tc.clone().multiplyScalar(0.22);
     for (let i = 0; i < THEME_NEB_COUNT; i++) {
       na[i*3]=dimTc.r; na[i*3+1]=dimTc.g; na[i*3+2]=dimTc.b;
     }
     themeNebGeo.attributes.color.needsUpdate = true;
-
     if (shockwave) shockwave.material.color.copy(tc);
   }
 
@@ -921,28 +1180,20 @@ function handleRegisterClick() {
   function triggerExplosion() {
     planetState = 'exploding';
     explTimer = 0;
-    shockwave.scale.set(1,1,1);
-    shockwave.material.opacity = 1.0;
-    shockGlow.scale.set(1,1,1);
-    shockGlow.material.opacity = 0.7;
+    shockwave.scale.set(1,1,1); shockwave.material.opacity = 1.0;
+    shockGlow.scale.set(1,1,1); shockGlow.material.opacity = 0.7;
 
     const dPos = debrisGeo.attributes.position.array;
     const dCol = debrisGeo.attributes.color.array;
     const tc = getThemeColor();
 
     for (let i = 0; i < DEBRIS_COUNT; i++) {
-      dPos[i*3]   = COLLISION_PT.x;
-      dPos[i*3+1] = COLLISION_PT.y;
-      dPos[i*3+2] = COLLISION_PT.z;
-
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(Math.random()*2 - 1);
-      const spd = 1.5 + Math.random() * 3.8;
+      dPos[i*3]=COLLISION_PT.x; dPos[i*3+1]=COLLISION_PT.y; dPos[i*3+2]=COLLISION_PT.z;
+      const theta = Math.random()*Math.PI*2, phi = Math.acos(Math.random()*2-1);
+      const spd = 1.5 + Math.random()*3.8;
       debrisData[i].vx = Math.sin(phi)*Math.cos(theta)*spd;
       debrisData[i].vy = Math.sin(phi)*Math.sin(theta)*spd;
       debrisData[i].vz = Math.cos(phi)*spd;
-
-      // Colors: hot core orange → theme color → ember red
       const t = Math.random();
       const c = new T.Color(0xff6600).lerp(t < 0.5 ? tc : new T.Color(0xff2200), t);
       dCol[i*3]=c.r; dCol[i*3+1]=c.g; dCol[i*3+2]=c.b;
@@ -953,17 +1204,15 @@ function handleRegisterClick() {
   }
 
   function resetPlanets() {
-    planetState = 'approaching';
-    approachT = 0;
+    planetState = 'approaching'; approachT = 0;
     planet1.scale.set(1,1,1); planet1.position.copy(START1);
     planet2.scale.set(1,1,1); planet2.position.copy(START2);
-    shockwave.material.opacity = 0;
-    shockGlow.material.opacity = 0;
+    shockwave.material.opacity = 0; shockGlow.material.opacity = 0;
     debrisPoints.material.opacity = 0;
   }
 
   /* ════════════════════════════════════════════════
-     ACTIVITY API (responds to form interactions)
+     ACTIVITY API
   ════════════════════════════════════════════════ */
   window._charSet = function(state) {
     if      (state === 'excited')  { targetActivity = 4.0; speedMult = 2.5; }
@@ -978,6 +1227,11 @@ function handleRegisterClick() {
   const clock = new T.Clock();
   syncTheme();
 
+  // Camera dolly-in: start far, ease to final position
+  const CAM_START_Z = 14.0, CAM_END_Z = 7.0;
+  camera.position.z = CAM_START_Z;
+  let camDollyT = 0;
+
   function animate() {
     requestAnimationFrame(animate);
     const dt = Math.min(clock.getDelta(), 0.05);
@@ -986,18 +1240,35 @@ function handleRegisterClick() {
     currentActivity = T.MathUtils.lerp(currentActivity, targetActivity, 0.07);
     syncTheme();
 
-    // Slow scenic universe rotation
+    // ── Camera dolly-in (first 3 seconds) ──
+    if (camDollyT < 1) {
+      camDollyT = Math.min(1, camDollyT + dt * 0.28);
+      const ease = 1 - Math.pow(1 - camDollyT, 3); // ease-out cubic
+      camera.position.z = CAM_START_Z + (CAM_END_Z - CAM_START_Z) * ease;
+    }
+
+    // ── Universe breathing ──
+    const breath = 1 + Math.sin(et * 0.22) * 0.003;
+    spaceGroup.scale.set(breath, breath, breath);
+
+    // ── Slow scenic rotation ──
     spaceGroup.rotation.y += 0.006 * dt;
 
-    // ── Starfield flythrough ──
+    // ── Starfield flythrough + twinkle ──
     const sp = starGeo.attributes.position.array;
+    const sc = starGeo.attributes.color.array;
     for (let i = 0; i < STAR_COUNT; i++) {
       const s = starData[i];
       s.z += s.speed * 1.8 * currentActivity * dt;
-      if (s.z > 6) { s.z = -18; s.x = (Math.random()-.5)*22; s.y = (Math.random()-.5)*16; }
+      if (s.z > 6) { s.z = -18; s.x=(Math.random()-.5)*22; s.y=(Math.random()-.5)*16; }
       sp[i*3]=s.x; sp[i*3+1]=s.y; sp[i*3+2]=s.z;
+      // Twinkle: modulate brightness per star
+      const twink = 0.7 + 0.3 * Math.sin(et * 3.5 + starTwinkle[i]);
+      const base = 0.5 + Math.random() * 0.0; // stable base (avoid re-random each frame)
+      sc[i*3]   *= twink; sc[i*3+1] *= twink; sc[i*3+2] *= twink;
     }
     starGeo.attributes.position.needsUpdate = true;
+    starGeo.attributes.color.needsUpdate = true;
 
     // ── Accretion disk swirl ──
     const dp = diskGeo.attributes.position.array;
@@ -1007,78 +1278,132 @@ function handleRegisterClick() {
       p.ang += angSpd * dt;
       const inflow = 0.06 * currentActivity * (1.25 - Math.min(1, p.dist * 0.38));
       p.dist -= inflow * dt;
-      if (p.dist < 0.1) { p.dist = 2.8 + Math.random()*0.7; p.ang = (p.arm*2*Math.PI)/3 + (Math.random()-.5)*0.2; }
+      if (p.dist < 0.1) { p.dist = 2.8+Math.random()*0.7; p.ang=(p.arm*2*Math.PI)/3+(Math.random()-.5)*0.2; }
       dp[i*3]   = Math.cos(p.ang)*p.dist;
       dp[i*3+2] = Math.sin(p.ang)*p.dist;
     }
     diskGeo.attributes.position.needsUpdate = true;
 
-    // ── Black hole pulse ──
+    // ── Black hole pulse + corona ──
     const pulse = 1 + Math.sin(et * 3.2 * currentActivity) * 0.035;
     horizon.scale.set(pulse, pulse, pulse);
     photonRing.rotation.z += 0.4 * dt;
     lensRing.rotation.z   -= 0.25 * dt;
+    coronaRing.rotation.z += 0.08 * dt;
     photonRingMat.opacity = 0.85 + Math.sin(et*4.5)*0.1;
+    coronaMat.opacity = 0.28 + Math.sin(et*1.8)*0.1;
 
-    // ── Nebula drift ──
-    nebula1.rotation.z += 0.008 * dt;
-    nebula2.rotation.z -= 0.005 * dt;
-    nebula3.rotation.y += 0.006 * dt;
-    themeNebula.rotation.z += 0.004 * dt;
+    // ── Gravitational wave ripple deformation ──
+    const rippleVerts = rippleGeo.attributes.position.array;
+    for (let i = 0; i < rippleVerts.length; i += 3) {
+      const rx = rippleVerts[i], rz = rippleVerts[i+2];
+      const dist2 = Math.sqrt(rx*rx + rz*rz);
+      rippleVerts[i+1] = Math.sin(dist2 * 2.2 - et * 2.5) * 0.18 / (1 + dist2 * 0.6);
+    }
+    rippleGeo.attributes.position.needsUpdate = true;
+    rippleMat.opacity = 0.05 + Math.sin(et*1.2)*0.02;
+
+    // ── Asteroid belt ──
+    for (const a of asteroidData) {
+      a.ang += a.speed * dt;
+      a.mesh.position.x = Math.cos(a.ang) * a.orbitR;
+      a.mesh.position.z = Math.sin(a.ang) * a.orbitR;
+      a.mesh.position.y = a.orbitY + Math.sin(a.ang * 2 + a.orbitTilt) * 0.15;
+      a.mesh.rotation.x += a.rotSpd * dt;
+      a.mesh.rotation.z += a.rotSpd * 0.7 * dt;
+    }
+
+    // ── Shooting stars ──
+    for (const m of meteorData) {
+      if (!m.active) {
+        m.cooldown -= dt;
+        if (m.cooldown <= 0) { spawnMeteor(m); m.cooldown = 4 + Math.random()*8; }
+      } else {
+        m.timer += dt;
+        const life = 0.5 + Math.random()*0; // fixed 0.5s life estimate
+        m.x += m.vx * dt; m.y += m.vy * dt; m.z += m.vz * dt;
+        // Shift history
+        for (let j = METEOR_TAIL-1; j > 0; j--) {
+          m.history[j].x = m.history[j-1].x;
+          m.history[j].y = m.history[j-1].y;
+          m.history[j].z = m.history[j-1].z;
+        }
+        m.history[0].x = m.x; m.history[0].y = m.y; m.history[0].z = m.z;
+        const pa = m.geo.attributes.position.array;
+        for (let j = 0; j < METEOR_TAIL; j++) {
+          pa[j*3]=m.history[j].x; pa[j*3+1]=m.history[j].y; pa[j*3+2]=m.history[j].z;
+        }
+        m.geo.attributes.position.needsUpdate = true;
+        m.pts.material.opacity = Math.max(0, 1 - m.timer / 0.55);
+        if (m.timer > 0.6 || m.x > 12 || m.x < -12) {
+          m.active = false;
+          m.pts.material.opacity = 0;
+        }
+      }
+    }
+
+    // ── Red dwarf + moon orbit ──
+    redDwarfGroup.rotation.y += 0.08 * dt;
+    rdMoonAngle += 0.55 * dt;
+    rdMoon.position.x = Math.cos(rdMoonAngle) * 0.52;
+    rdMoon.position.z = Math.sin(rdMoonAngle) * 0.52;
+    redDwarf.rotation.y += 0.3 * dt;
+
+
+
+    // ── Nebula multi-speed parallax drift ──
+    nebula1.rotation.z += 0.009 * dt;
+    nebula2.rotation.z -= 0.006 * dt;
+    nebula3.rotation.y += 0.007 * dt;
+    themeNebula.rotation.z += 0.005 * dt;
+    // Nebulas at slightly different y positions for parallax
+    nebula1.position.y = Math.sin(et * 0.11) * 0.08;
+    nebula2.position.y = Math.sin(et * 0.09 + 1.2) * 0.06;
 
     // ── Planetary approach & collision ──
     if (planetState === 'approaching') {
       approachT += dt * 0.07 * speedMult;
-      // Ease-in-out: slow at start, accelerate near collision
       const eased = approachT < 0.8 ? approachT : 0.8 + (approachT-0.8)*3.5;
       if (eased >= 1.0) {
         triggerExplosion();
       } else {
-        planet1.position.lerpVectors(START1, COLLISION_PT, Math.min(eased, 1));
-        planet2.position.lerpVectors(START2, COLLISION_PT, Math.min(eased, 1));
-        planet1.rotation.y += 0.6 * dt;
-        planet1.rotation.x += 0.15 * dt;
-        planet2.rotation.y -= 0.8 * dt;
-        planet2.rotation.x += 0.2 * dt;
-        // Rings orbit
-        if (planet2Rings) planet2Rings.rotation.y += 1.2 * dt;
-        // Lava crack flicker
+        planet1.position.lerpVectors(START1, COLLISION_PT, Math.min(eased,1));
+        planet2.position.lerpVectors(START2, COLLISION_PT, Math.min(eased,1));
+        planet1.rotation.y += 0.6*dt; planet1.rotation.x += 0.15*dt;
+        planet2.rotation.y -= 0.8*dt; planet2.rotation.x += 0.2*dt;
+        if (planet2Rings) planet2Rings.rotation.y += 1.2*dt;
         if (planet1Wire) planet1Wire.material.opacity = 0.3 + Math.sin(et*12)*0.15;
+        // lava spots pulse
+        lavaSpots.material.opacity = 0.7 + Math.sin(et*8)*0.15;
+        // frost halo rotate
+        frostHalo.rotation.y += 0.5*dt;
       }
     } else if (planetState === 'exploding') {
       explTimer += dt * speedMult;
-
-      // Expand shockwaves
       const swScale = 1 + explTimer * 18 * speedMult;
-      shockwave.scale.set(swScale, swScale, swScale);
-      shockGlow.scale.set(swScale*0.7, swScale*0.7, swScale*0.7);
+      shockwave.scale.set(swScale,swScale,swScale);
+      shockGlow.scale.set(swScale*0.7,swScale*0.7,swScale*0.7);
       shockwave.material.opacity = Math.max(0, 1 - explTimer/1.8);
       shockGlow.material.opacity = Math.max(0, 0.6 - explTimer/1.4);
-
-      // Planet fragment / shrink
       const frac = Math.max(0, 1 - explTimer/0.35);
-      planet1.scale.set(frac, frac, frac);
-      planet2.scale.set(frac, frac, frac);
-
-      // Debris particle integration
+      planet1.scale.set(frac,frac,frac);
+      planet2.scale.set(frac,frac,frac);
       const dp2 = debrisGeo.attributes.position.array;
       for (let i = 0; i < DEBRIS_COUNT; i++) {
         const d = debrisData[i];
-        dp2[i*3]   += d.vx * dt;
-        dp2[i*3+1] += d.vy * dt;
-        dp2[i*3+2] += d.vz * dt;
-        const drag = 1 - 0.55 * dt;
-        d.vx *= drag; d.vy *= drag; d.vz *= drag;
+        dp2[i*3]+=d.vx*dt; dp2[i*3+1]+=d.vy*dt; dp2[i*3+2]+=d.vz*dt;
+        const drag = 1-0.55*dt;
+        d.vx*=drag; d.vy*=drag; d.vz*=drag;
       }
       debrisGeo.attributes.position.needsUpdate = true;
-      debrisPoints.material.opacity = Math.max(0, 1 - explTimer/4.5);
-
+      debrisPoints.material.opacity = Math.max(0, 1-explTimer/4.5);
       if (explTimer >= 5.0) resetPlanets();
     }
 
     renderer.render(scene, camera);
   }
   animate();
+
 
   /* ── Form interaction bindings ── */
   setTimeout(() => {
