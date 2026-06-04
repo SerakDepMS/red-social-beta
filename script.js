@@ -1,4 +1,3 @@
-
 // ═══════════════════════════════════════════
 //  ESTADO GLOBAL
 // ═══════════════════════════════════════════
@@ -582,6 +581,7 @@ function applyTheme(){
   const t=localStorage.getItem('sms_theme');if(t==='dark')setTheme(true);
   const tc=localStorage.getItem('sms_color')||'green';applyColor(tc,false);
   const rm=localStorage.getItem('sms_readmode')==='1';if(rm)document.body.classList.add('read-mode');
+  applyWallpaper();
 }
 function applyColor(c,doSave=true){
   document.body.classList.remove(
@@ -590,6 +590,120 @@ function applyColor(c,doSave=true){
   );
   if(c!=='green')document.body.classList.add('theme-'+c);
   if(doSave)localStorage.setItem('sms_color',c);
+  // Re-render settings swatches if open
+  const swatches=document.querySelectorAll('.color-swatch');
+  swatches.forEach(s=>{ s.classList.toggle('active', s.dataset.colorId===c); });
+}
+
+// ═══════════════════════════════════════════
+//  WALLPAPER SYSTEM — multimedia (imagen, GIF, video mp4/webm/mov...)
+// ═══════════════════════════════════════════
+const PRESET_WALLPAPERS = [
+  { id:'wp1', url:'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=1920&q=80', label:'Galaxia',  type:'image' },
+  { id:'wp2', url:'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=1920&q=80', label:'Nebulosa', type:'image' },
+  { id:'wp3', url:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=80', label:'Montañas', type:'image' },
+  { id:'wp4', url:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80', label:'Playa',    type:'image' },
+  { id:'wp5', url:'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80', label:'Bosque',   type:'image' },
+  { id:'wp6', url:'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&q=80', label:'Valle',    type:'image' },
+  { id:'wp7', url:'https://images.unsplash.com/photo-1485470733090-0aae1788d5af?w=1920&q=80', label:'Aurora',   type:'image' },
+  { id:'wp8', url:'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1920&q=80', label:'Océano',   type:'image' },
+];
+
+// ObjectURL del archivo subido (en memoria, sin tocar localStorage)
+let _wpObjectURL = null;
+
+function _detectWpType(urlOrMime) {
+  if (!urlOrMime) return 'image';
+  const s = urlOrMime.toLowerCase();
+  if (s.startsWith('data:video') || s.startsWith('video/') ||
+      /\.(mp4|webm|ogg|mov|avi|mkv|m4v)(\?|$|#)/.test(s)) return 'video';
+  return 'image';
+}
+
+function applyWallpaper() {
+  const old = document.getElementById('sms-wallpaper');
+  if (old) old.remove();
+
+  const wpUrl   = _wpObjectURL || localStorage.getItem('sms_wallpaper') || '';
+  const wpType  = localStorage.getItem('sms_wallpaper_type') || _detectWpType(wpUrl);
+  const opacity = parseFloat(localStorage.getItem('sms_wp_opacity') || '0.35');
+
+  if (!wpUrl) {
+    document.body.classList.remove('has-wallpaper');
+    return;
+  }
+
+  const wrap = document.createElement('div');
+  wrap.id = 'sms-wallpaper';
+  const dark = document.body.classList.contains('dark');
+  wrap.style.setProperty('--wp-overlay', dark
+    ? `rgba(0,0,0,${opacity})`
+    : `rgba(255,255,255,${opacity * 0.5})`
+  );
+
+  if (wpType === 'video') {
+    const vid = document.createElement('video');
+    vid.src         = wpUrl;
+    vid.autoplay    = true;
+    vid.loop        = true;
+    vid.muted       = true;
+    vid.playsInline = true;
+    // El CSS #sms-wallpaper video ya lo posiciona y dimensiona
+    wrap.appendChild(vid);
+    // Intentar play (algunos navegadores requieren interacción previa)
+    setTimeout(() => vid.play().catch(() => {}), 100);
+  } else {
+    wrap.style.backgroundImage = `url(${wpUrl})`;
+  }
+
+  document.body.insertBefore(wrap, document.body.firstChild);
+  document.body.classList.add('has-wallpaper');
+}
+
+function setWallpaper(url, type) {
+  if (_wpObjectURL) { URL.revokeObjectURL(_wpObjectURL); _wpObjectURL = null; }
+  if (url) {
+    try { localStorage.setItem('sms_wallpaper', url); } catch(e) {}
+    localStorage.setItem('sms_wallpaper_type', type || _detectWpType(url));
+  } else {
+    localStorage.removeItem('sms_wallpaper');
+    localStorage.removeItem('sms_wallpaper_type');
+  }
+  applyWallpaper();
+  toast(url ? 'Fondo aplicado ✨' : 'Fondo eliminado', 'success');
+  if (cView === 'settings' && cSettingsSection === 'appearance') renderSettings();
+}
+
+function setWallpaperOpacity(val) {
+  localStorage.setItem('sms_wp_opacity', val);
+  applyWallpaper();
+}
+
+function uploadWallpaper() {
+  const inp = document.createElement('input');
+  inp.type   = 'file';
+  inp.accept = 'image/*,video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo,video/x-matroska,.gif,.webp,.avif,.svg';
+  inp.onchange = () => {
+    const file = inp.files[0]; if (!file) return;
+
+    const mime   = file.type || '';
+    const wpType = _detectWpType(mime || file.name);
+
+    // Revocar ObjectURL anterior
+    if (_wpObjectURL) { URL.revokeObjectURL(_wpObjectURL); _wpObjectURL = null; }
+
+    // Solo guardar el tipo en localStorage (no el archivo, para evitar QuotaExceededError)
+    localStorage.setItem('sms_wallpaper_type', wpType);
+    localStorage.removeItem('sms_wallpaper');
+
+    // Crear ObjectURL en memoria — funciona con archivos de cualquier tamaño
+    _wpObjectURL = URL.createObjectURL(file);
+
+    applyWallpaper();
+    toast(`Fondo ${wpType === 'video' ? '🎬 video' : '🖼️ imagen/GIF'} aplicado ✨`, 'success');
+    if (cView === 'settings' && cSettingsSection === 'appearance') renderSettings();
+  };
+  inp.click();
 }
 const _themeBtnEl = document.getElementById('theme-btn');
 if(_themeBtnEl) _themeBtnEl.addEventListener('click',()=>setTheme(!document.body.classList.contains('dark')));
@@ -2501,16 +2615,47 @@ function renderSetPanel(){
       {id:'amber', color:'#d97706', label:'Retro Ámbar'},
     ];
     const cfg = CU.avatarConfig || { use3D: false, skinColor: '#e0ac69', shirtColor: '#3b82f6', pantsColor: '#1e3a8a', hatType: 'none', hatColor: '#ef4444' };
+    const currentWp=localStorage.getItem('sms_wallpaper')||'';
+    const currentOpacity=parseFloat(localStorage.getItem('sms_wp_opacity')||'0.35');
     c.innerHTML=`<h3>Apariencia</h3>
       <div class="sets-row"><div><div class="sr-label">Modo oscuro</div></div><label class="toggle"><input type="checkbox" ${dark?'checked':''} onchange="setTheme(this.checked)"><div class="tslider"></div></label></div>
       <div class="sets-row"><div><div class="sr-label">Modo lectura</div><div class="sr-sub">Mejora la legibilidad con tipografía serif</div></div><label class="toggle"><input type="checkbox" ${rm?'checked':''} onchange="toggleReadMode(this.checked)"><div class="tslider"></div></label></div>
       <div class="sets-row"><div><div class="sr-label">Color principal</div></div></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:7px;">
-        ${colors.map(cl=>`<div onclick="applyColor('${cl.id}')" class="color-swatch ${currentColor===cl.id?'active':''}" style="background:${cl.color};" title="${cl.label}"></div>`).join('')}
+        ${colors.map(cl=>`<div onclick="applyColor('${cl.id}')" data-color-id="${cl.id}" class="color-swatch ${currentColor===cl.id?'active':''}" style="background:${cl.color};" title="${cl.label}"></div>`).join('')}
       </div>
       <div class="sets-row" style="margin-top:13px;"><div><div class="sr-label">Tamaño de texto</div></div><select class="priv-sel" onchange="document.documentElement.style.fontSize=this.value+'px';localStorage.setItem('sms_fontsize',this.value)"><option value="14" ${localStorage.getItem('sms_fontsize')==='14'?'selected':''}>Pequeño (14px)</option><option value="15" ${!localStorage.getItem('sms_fontsize')||localStorage.getItem('sms_fontsize')==='15'?'selected':''}>Normal (15px)</option><option value="17" ${localStorage.getItem('sms_fontsize')==='17'?'selected':''}>Grande (17px)</option></select></div>
       <div class="sets-row"><div><div class="sr-label">Modo compacto</div><div class="sr-sub">Feed más denso con menos espacio entre posts</div></div><label class="toggle"><input type="checkbox" ${document.body.classList.contains('compact-mode')?'checked':''} onchange="toggleCompactMode(this.checked)"><div class="tslider"></div></label></div>
       <div class="sets-row"><div><div class="sr-label">Atajos de teclado</div><div class="sr-sub">Ver todos los atajos disponibles</div></div><button class="btn btn-ghost" onclick="openModal('kbd-modal')"><i class="fas fa-keyboard"></i> Ver atajos</button></div>
+      
+      <hr class="div" style="margin: 16px 0 12px;">
+      <h3 style="margin-bottom:8px;display:flex;align-items:center;gap:8px;"><i class="fas fa-photo-film" style="color:var(--green);font-size:.9rem;"></i> Fondo de pantalla</h3>
+      <p style="font-size:.78rem;color:var(--text2);margin-bottom:10px;">Sube cualquier <strong>imagen, GIF animado o video</strong> como fondo.</p>
+      <div class="wp-grid">
+        <div class="wp-thumb wp-none ${!currentWp && !_wpObjectURL?'active':''}" onclick="setWallpaper('')" style="cursor:pointer;">
+          <span style="font-size:1.3rem;display:block;margin-bottom:3px;">✕</span>Sin fondo
+        </div>
+        ${PRESET_WALLPAPERS.map(wp=>`
+          <div class="wp-thumb ${currentWp===wp.url?'active':''}" onclick="setWallpaper('${wp.url}','${wp.type||'image'}')" title="${wp.label}" style="cursor:pointer;overflow:hidden;background:#111;padding:0;">
+            <img src="${wp.url.replace('w=1920','w=200')}" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
+          </div>
+        `).join('')}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;">
+        <button class="wp-upload-btn" onclick="uploadWallpaper()" style="flex:1;min-width:180px;">
+          <i class="fas fa-photo-film"></i> Subir imagen / GIF / video
+        </button>
+        ${currentWp || _wpObjectURL ? `<button class="wp-upload-btn" onclick="setWallpaper('')" style="flex:none;padding:9px 14px;background:var(--danger-l);color:var(--danger);border:1px solid var(--danger);"><i class="fas fa-trash"></i> Quitar</button>` : ''}
+      </div>
+      <p style="font-size:.71rem;color:var(--text2);margin-top:6px;"><i class="fas fa-info-circle"></i> JPG · PNG · GIF · WebP · MP4 · WebM · MOV · OGG — sin límite de tamaño</p>
+      ${currentWp || _wpObjectURL ? `
+        <div class="wp-opacity-row" style="margin-top:14px;">
+          <span style="font-size:.8rem;color:var(--text2);white-space:nowrap;"><i class="fas fa-adjust"></i> Opacidad del overlay</span>
+          <input type="range" min="0" max="0.85" step="0.05" value="${currentOpacity}"
+                 oninput="setWallpaperOpacity(this.value);document.getElementById('wp-opacity-val').textContent=Math.round(this.value*100)+'%'">
+          <span id="wp-opacity-val" style="font-size:.8rem;font-weight:700;color:var(--green);min-width:36px;text-align:right;">${Math.round(currentOpacity*100)}%</span>
+        </div>
+      ` : ''}
       
       <hr class="div" style="margin: 15px 0;">
       <h3>Personalización de Avatar 3D</h3>
