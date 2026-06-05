@@ -17,8 +17,10 @@
   (function(){
     const t = localStorage.getItem('sms_theme');
     const c = localStorage.getItem('sms_color');
+    const p = localStorage.getItem('sms_sidebar_pinned');
     if(t === 'dark') document.body.classList.add('dark');
     if(c && c !== 'green') document.body.classList.add('theme-' + c);
+    if(p === '1') document.body.classList.add('sidebar-pinned');
   })();
 </script>
 
@@ -93,6 +95,14 @@
       <div class="card" id="pc-card"></div>
       <div class="card">
         <div class="nav" id="main-nav">
+          <div class="nav-item pin-control-item" id="desktop-pin-control" style="border-bottom:1px solid var(--border);border-radius:0;margin-bottom:5px;padding-bottom:12px;cursor:default;">
+            <span class="nicon"><i class="fas fa-thumbtack"></i></span>
+            <span style="font-weight:600;">Fijar panel lateral</span>
+            <div class="toggle" style="margin-left:auto;scale:0.85;transform-origin:right;">
+              <input type="checkbox" id="sidebar-pin-checkbox" onchange="toggleSidebarPin(this.checked)">
+              <span class="tslider"></span>
+            </div>
+          </div>
           <div class="nav-item active" data-view="public" onclick="navigate('public')"><span class="nicon"><i class="fas fa-globe"></i></span>Foro público</div>
           <div class="nav-item" data-view="stories" onclick="navigate('stories')"><span class="nicon"><i class="fas fa-circle-play"></i></span>Historias</div>
           <div class="nav-item" data-view="reels" onclick="navigate('reels')"><span class="nicon"><i class="fas fa-film"></i></span>Reels</div>
@@ -210,8 +220,8 @@
         <button class="tab-pill" id="st-vid" onclick="storyTab('video')"><i class="fas fa-video"></i> Vídeo</button>
         <button class="tab-pill" id="st-txt" onclick="storyTab('text')"><i class="fas fa-font"></i> Texto</button>
       </div>
-      <div id="sp-image"><input type="file" id="si-file" accept="image/*,video/*,audio/*" style="margin-bottom:7px;"><div id="si-prev" style="display:none;text-align:center;"><img id="si-el" style="max-height:190px;border-radius:var(--r-md);" src=""></div></div>
-      <div id="sp-video" style="display:none;"><input type="file" id="sv-file" accept="video/*,audio/*" style="margin-bottom:7px;"></div>
+      <div id="sp-image"><input type="file" id="si-file" accept="image/*" style="margin-bottom:7px;"><div id="si-prev" style="display:none;text-align:center;"><img id="si-el" style="max-height:190px;border-radius:var(--r-md);" src=""></div></div>
+      <div id="sp-video" style="display:none;"><input type="file" id="sv-file" accept="video/*" style="margin-bottom:7px;"><div id="sv-prev" style="display:none;text-align:center;"><video id="sv-el" style="max-height:190px;border-radius:var(--r-md);max-width:100%;" controls src=""></video></div></div>
       <div id="sp-text" style="display:none;">
         <textarea id="st-text" placeholder="Escribe algo..." style="min-height:90px;resize:none;"></textarea>
         <div style="display:flex;align-items:center;gap:9px;margin-top:7px;">

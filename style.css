@@ -724,30 +724,53 @@ body.noscroll {
 @media (min-width: 781px) {
   .btn-back-chat     { display: none !important; }
   .btn-back-settings { display: none !important; }
-  /* Ocultamos solo el botón hamburguesa IZQUIERDO (sidebar de navegación) */
-  .mobile-menu-btn:not(#mobile-right-toggle) { display: none !important; }
+  /* Habilitar botón hamburguesa por defecto en desktop para menú desplegable,
+     se oculta solo si el sidebar está fijado. */
+  .mobile-menu-btn:not(#mobile-right-toggle) { display: inline-flex; }
+  body.sidebar-pinned .mobile-menu-btn:not(#mobile-right-toggle) { display: none !important; }
   /* Mostramos el botón hamburguesa DERECHO (menú de usuario) */
   #mobile-right-toggle {
     display: inline-flex !important;
   }
-  /* El backdrop del sidebar izquierdo no se usa en escritorio */
-  .sidebar-backdrop  { display: none !important; }
-  /* El drawer derecho ahora se muestra (no se oculta con display:none) */
-  /* Eliminamos la línea .right-drawer { display: none; } para que funcione */
+  /* El backdrop se usa para los cajones colapsables en desktop */
+  body.sidebar-pinned .sidebar-backdrop  { display: none !important; }
 
-  .layout { grid-template-columns: var(--sidebar) 1fr; }
+  /* Layout de una columna por defecto. Dos columnas cuando está fijado. */
+  .layout { grid-template-columns: 1fr; }
+  body.sidebar-pinned .layout { grid-template-columns: var(--sidebar) 1fr; }
 
+  /* Menú lateral izquierdo colapsable por defecto. Sticky/fijo cuando está fijado. */
   .left-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: -290px !important;
+    width: 280px !important;
+    height: 100vh !important;
+    z-index: 999 !important;
+    transition: left .3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overflow-y: auto !important;
+    box-shadow: var(--sh3) !important;
+  }
+  .left-sidebar.active {
+    left: 0 !important;
+  }
+
+  body.sidebar-pinned .left-sidebar {
     position: sticky !important;
     top: var(--hh) !important;
     left: auto !important;
+    width: auto !important;
     height: calc(100vh - var(--hh)) !important;
     overflow-y: auto !important;
     box-shadow: none !important;
     transition: none !important;
     z-index: auto !important;
+    margin: 0 !important;
   }
-  .left-sidebar .mobile-sidebar-header { display: none !important; }
+  
+  /* Encabezado del menú izquierdo se muestra en modo cajón y se oculta al fijar. */
+  .left-sidebar .mobile-sidebar-header { display: flex !important; }
+  body.sidebar-pinned .left-sidebar .mobile-sidebar-header { display: none !important; }
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1527,3 +1550,34 @@ body.has-wallpaper { background: transparent !important; }
 
 /* Reel thumbnail hover hint */
 .reel:hover .reel-play-hint { opacity: 1 !important; }
+
+/* Sidebar Pin Toggle Styling */
+.nav-item.pin-control-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 11px;
+  transition: none;
+  color: var(--text2);
+}
+.nav-item.pin-control-item:hover {
+  background: none !important;
+  color: var(--text2) !important;
+}
+
+@media (max-width: 780px) {
+  #desktop-pin-control {
+    display: none !important;
+  }
+}
+
+/* Previews in Story Creator Modal */
+#si-el, #sv-el {
+  max-width: 100%;
+  max-height: 220px;
+  height: auto;
+  border-radius: var(--r-md);
+  object-fit: contain;
+  display: block;
+  margin: 8px auto 0;
+}
