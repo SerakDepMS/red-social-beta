@@ -510,12 +510,12 @@ body {
 /* ═══ COLOR SYNC — adapts to user's chosen color ═══ */
 /* These are overridden dynamically by JS below */
 :root {
-  --dyn-c1: #7c3aed;
-  --dyn-c2: #a78bfa;
-  --dyn-c3: #c4b5fd;
-  --dyn-cl: rgba(124,58,237,.12);
-  --dyn-cl2: rgba(124,58,237,.22);
-  --dyn-bg: rgba(10,8,24,0.82);
+  --dyn-c1: #2d6a4f;
+  --dyn-c2: #40916c;
+  --dyn-c3: #74c69d;
+  --dyn-cl: rgba(45,106,79,.12);
+  --dyn-cl2: rgba(45,106,79,.22);
+  --dyn-bg: rgba(4,12,7,0.82);
 }
 
 /* Apply dynamic color to key elements */
@@ -660,8 +660,8 @@ body {
     'teal':   ['#0f766e','#0d9488','#99f6e4','rgba(13,148,136,.12)','rgba(13,148,136,.22)'],
     'amber':  ['#b45309','#d97706','#fcd34d','rgba(217,119,6,.12)','rgba(217,119,6,.22)'],
   };
-  const c = localStorage.getItem('sms_color') || 'purple';
-  const v = COLOR_VARS[c] || COLOR_VARS['purple'];
+  const c = localStorage.getItem('sms_color') || 'green';
+  const v = COLOR_VARS[c] || COLOR_VARS['green'];
   const r = document.documentElement;
   r.style.setProperty('--dyn-c1', v[0]);
   r.style.setProperty('--dyn-c2', v[1]);
@@ -917,8 +917,8 @@ function handleRegisterClick() {
     'amber':  ['#d97706', '#f59e0b', '#fcd34d'],
     'green':  ['#2d6a4f', '#40916c', '#74c69d'],
   };
-  const savedColor = localStorage.getItem('sms_color') || 'purple';
-  const colors = COLOR_MAP[savedColor] || COLOR_MAP['purple'];
+  const savedColor = localStorage.getItem('sms_color') || 'green';
+  const colors = COLOR_MAP[savedColor] || COLOR_MAP['green'];
   const overlay = document.getElementById('intro-overlay');
   overlay.style.setProperty('--intro-c1', colors[0]);
   overlay.style.setProperty('--intro-c2', colors[1]);

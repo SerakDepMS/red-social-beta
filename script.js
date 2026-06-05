@@ -111,7 +111,7 @@ function save(){
 function gl(k){try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch(e){return null;}}
 function loadData(){
   const now=Date.now();
-  users=gl('sms_users')||[{id:1,username:'AdminSerak',password:'admin123',photo:'https://randomuser.me/api/portraits/men/1.jpg',cover:'https://picsum.photos/800/200?random=99',bio:'Fundador del clan 🌿',role:'Fundador',isAdmin:true,followers:[],following:[],blocked:[],savedPosts:[],privacy:{posts:'public',comments:'everyone'},deactivated:false,badges:[],birthday:null,birthdayPrivacy:'friends',twoFA:{enabled:false,secret:null},suspendedUntil:null,ratings:[],collections:[],mutedUsers:[],verified:true,lastActivity:Date.now()}];
+  users=gl('sms_users')||[{id:1,username:'AdminSerak',password:'admin123',photo:'https://randomuser.me/api/portraits/men/1.jpg',cover:'https://picsum.photos/800/200?random=99',bio:'Fundador del clan 🌿',role:'Fundador',isAdmin:true,followers:[],following:[],blocked:[],savedPosts:[],privacy:{posts:'public',comments:'everyone'},deactivated:false,badges:[],birthday:null,birthdayPrivacy:'friends',twoFA:{enabled:false,secret:null},suspendedUntil:null,ratings:[],collections:[],mutedUsers:[],verified:true,lastActivity:Date.now(),primaryColor:'green',theme:'light'}];
   posts=gl('sms_posts')||[];
   groups=gl('sms_groups')||[];
   messages=gl('sms_messages')||[];
@@ -479,6 +479,8 @@ function doLogin(){
   if(user.deactivated){user.deactivated=false;save();}
   CU={...user};
   localStorage.setItem('sms_currentUser', JSON.stringify(CU));
+  localStorage.setItem('sms_color', CU.primaryColor || 'green');
+  localStorage.setItem('sms_theme', CU.theme || 'light');
   window.location.href = 'dashboard.html';
 }
 function doRegister(){
@@ -486,16 +488,20 @@ function doRegister(){
   if(!u||!p){authErr('Completa todos los campos.');return;}
   if(p.length<4){authErr('La contraseña debe tener al menos 4 caracteres.');return;}
   if(users.find(x=>x.username===u)){authErr('Ese nombre de usuario ya está en uso.');return;}
-  const nu={id:ids.nu++,username:u,password:p,photo:'https://randomuser.me/api/portraits/lego/'+Math.floor(Math.random()*8+1)+'.jpg',cover:'https://picsum.photos/800/200?random='+Math.floor(Math.random()*100),bio:'Nuevo miembro 👋',role:'Miembro',isAdmin:false,followers:[],following:[],blocked:[],savedPosts:[],privacy:{posts:'public',comments:'everyone'},deactivated:false,badges:[],birthday:null,birthdayPrivacy:'friends',twoFA:{enabled:false,secret:null},suspendedUntil:null,ratings:[],collections:[],mutedUsers:[],verified:false,lastActivity:Date.now()};
+  const nu={id:ids.nu++,username:u,password:p,photo:'https://randomuser.me/api/portraits/lego/'+Math.floor(Math.random()*8+1)+'.jpg',cover:'https://picsum.photos/800/200?random='+Math.floor(Math.random()*100),bio:'Nuevo miembro 👋',role:'Miembro',isAdmin:false,followers:[],following:[],blocked:[],savedPosts:[],privacy:{posts:'public',comments:'everyone'},deactivated:false,badges:[],birthday:null,birthdayPrivacy:'friends',twoFA:{enabled:false,secret:null},suspendedUntil:null,ratings:[],collections:[],mutedUsers:[],verified:false,lastActivity:Date.now(),primaryColor:'green',theme:'light'};
   users.push(nu);save();
   CU={...nu};
   localStorage.setItem('sms_currentUser', JSON.stringify(CU));
+  localStorage.setItem('sms_color', 'green');
+  localStorage.setItem('sms_theme', 'light');
   window.location.href = 'dashboard.html';
 }
 function doLogout(){
   if (chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
   CU=null;
   localStorage.removeItem('sms_currentUser');
+  localStorage.setItem('sms_color', 'green');
+  localStorage.setItem('sms_theme', 'light');
   window.location.href = 'index.html';
 }
 function launch(){
@@ -569,7 +575,14 @@ function checkBirthdayNotifs(){
 // ═══════════════════════════════════════════
 function setTheme(dark){
   document.body.classList.toggle('dark',dark);
-  localStorage.setItem('sms_theme',dark?'dark':'light');
+  const themeVal = dark ? 'dark' : 'light';
+  localStorage.setItem('sms_theme',themeVal);
+  if(CU){
+    CU.theme = themeVal;
+    const u = users.find(x => x.id === CU.id);
+    if(u) u.theme = themeVal;
+    save();
+  }
   document.getElementById('theme-btn').innerHTML=dark?'<i class="fas fa-sun"></i>':'<i class="fas fa-moon"></i>';
   
   const rdThemeBtn = document.getElementById('rd-theme-btn');
@@ -592,7 +605,15 @@ function applyColor(c,doSave=true){
     'theme-cyan','theme-yellow','theme-red','theme-teal','theme-amber'
   );
   if(c!=='green')document.body.classList.add('theme-'+c);
-  if(doSave)localStorage.setItem('sms_color',c);
+  if(doSave){
+    localStorage.setItem('sms_color',c);
+    if(CU){
+      CU.primaryColor = c;
+      const u = users.find(x => x.id === CU.id);
+      if(u) u.primaryColor = c;
+      save();
+    }
+  }
   // Re-render settings swatches if open
   const swatches=document.querySelectorAll('.color-swatch');
   swatches.forEach(s=>{ s.classList.toggle('active', s.dataset.colorId===c); });
@@ -1840,6 +1861,13 @@ function renderSV(){
     ca.innerHTML=`<video id="sv-video-player" src="${s.media}" style="max-width:100%;max-height:100%;object-fit:contain;" autoplay playsinline></video>`;
     const vid = document.getElementById('sv-video-player');
     if (vid) {
+      vid.muted = false;
+      vid.volume = 1.0;
+      vid.play().catch(err => {
+        console.log("Autoplay with sound blocked, trying muted fallback", err);
+        vid.muted = true;
+        vid.play();
+      });
       vid.onloadedmetadata = () => {
         duration = vid.duration || 5;
         startStoryTimer(duration);

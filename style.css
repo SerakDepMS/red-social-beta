@@ -757,15 +757,19 @@ body.noscroll {
 
   body.sidebar-pinned .left-sidebar {
     position: sticky !important;
-    top: var(--hh) !important;
+    top: calc(var(--hh) + 18px) !important;
     left: auto !important;
-    width: auto !important;
-    height: calc(100vh - var(--hh)) !important;
+    width: var(--sidebar) !important;
+    height: calc(100vh - var(--hh) - 36px) !important;
     overflow-y: auto !important;
     box-shadow: none !important;
     transition: none !important;
     z-index: auto !important;
+    background: transparent !important;
     margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    align-self: start !important;
   }
   
   /* Encabezado del menú izquierdo se muestra en modo cajón y se oculta al fijar. */
@@ -819,7 +823,7 @@ body.noscroll {
   #lightbox-modal { padding: 8px !important; }
   #lightbox-modal > div { max-width: 96vw !important; }
   #story-viewer-modal { padding: 0 !important; }
-  .sv-wrap { max-width: 100%; border-radius: 0; }
+  #story-viewer-modal .sv-wrap { max-width: 100% !important; height: 100vh !important; max-height: 100% !important; border-radius: 0 !important; }
 
   /* Cards */
   .card { border-radius: var(--r-md); }

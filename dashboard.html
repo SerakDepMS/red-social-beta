@@ -97,11 +97,11 @@
         <div class="nav" id="main-nav">
           <div class="nav-item pin-control-item" id="desktop-pin-control" style="border-bottom:1px solid var(--border);border-radius:0;margin-bottom:5px;padding-bottom:12px;cursor:default;">
             <span class="nicon"><i class="fas fa-thumbtack"></i></span>
-            <span style="font-weight:600;">Fijar panel lateral</span>
-            <div class="toggle" style="margin-left:auto;scale:0.85;transform-origin:right;">
+            <label for="sidebar-pin-checkbox" style="font-weight:600;cursor:pointer;flex:1;margin-right:10px;">Fijar panel lateral</label>
+            <label class="toggle" style="margin-left:auto;scale:0.85;transform-origin:right;cursor:pointer;">
               <input type="checkbox" id="sidebar-pin-checkbox" onchange="toggleSidebarPin(this.checked)">
-              <span class="tslider"></span>
-            </div>
+              <div class="tslider"></div>
+            </label>
           </div>
           <div class="nav-item active" data-view="public" onclick="navigate('public')"><span class="nicon"><i class="fas fa-globe"></i></span>Foro público</div>
           <div class="nav-item" data-view="stories" onclick="navigate('stories')"><span class="nicon"><i class="fas fa-circle-play"></i></span>Historias</div>
@@ -220,7 +220,7 @@
         <button class="tab-pill" id="st-vid" onclick="storyTab('video')"><i class="fas fa-video"></i> Vídeo</button>
         <button class="tab-pill" id="st-txt" onclick="storyTab('text')"><i class="fas fa-font"></i> Texto</button>
       </div>
-      <div id="sp-image"><input type="file" id="si-file" accept="image/*" style="margin-bottom:7px;"><div id="si-prev" style="display:none;text-align:center;"><img id="si-el" style="max-height:190px;border-radius:var(--r-md);" src=""></div></div>
+      <div id="sp-image"><input type="file" id="si-file" accept="image/*" style="margin-bottom:7px;"><div id="si-prev" style="display:none;text-align:center;"><img id="si-el" style="max-height:190px;border-radius:var(--r-md);max-width:100%;object-fit:contain;" src=""></div></div>
       <div id="sp-video" style="display:none;"><input type="file" id="sv-file" accept="video/*" style="margin-bottom:7px;"><div id="sv-prev" style="display:none;text-align:center;"><video id="sv-el" style="max-height:190px;border-radius:var(--r-md);max-width:100%;" controls src=""></video></div></div>
       <div id="sp-text" style="display:none;">
         <textarea id="st-text" placeholder="Escribe algo..." style="min-height:90px;resize:none;"></textarea>
