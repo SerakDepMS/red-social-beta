@@ -1642,3 +1642,64 @@ body.has-wallpaper { background: transparent !important; }
 .ps-card{background:var(--input-bg);border-radius:var(--r-md);padding:10px 8px;text-align:center;border:1.5px solid var(--border);}
 .ps-val{font-size:1.18rem;font-weight:800;font-family:var(--font-head);color:var(--green);}
 .ps-label{font-size:.68rem;color:var(--text2);margin-top:2px;display:flex;align-items:center;justify-content:center;gap:4px;}
+/* ═══ FEATURES v2.0 ════════════════════════════════════════════════ */
+
+/* Feed grid view */
+.feed-grid-view { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px !important; }
+.feed-grid-view .post { margin-bottom: 0 !important; }
+.feed-grid-view .post .p-body { max-height: 80px; overflow: hidden; font-size: .83rem; }
+.feed-grid-view .post .comments { display: none !important; }
+.feed-grid-view .post .p-acts { font-size: .78rem; }
+.feed-grid-view .post .p-acts .act { padding: 5px 8px; }
+
+/* Voice record button */
+.voice-record-btn { background: var(--input-bg) !important; }
+.voice-record-btn.recording { background: var(--danger-l) !important; color: var(--danger) !important; animation: pulse-rec .8s ease infinite; }
+@keyframes pulse-rec { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+
+/* Voice message bubble */
+.voice-msg-bubble { display: flex; align-items: center; gap: 8px; background: var(--green-l); border-radius: var(--r-md); padding: 8px 12px; }
+.voice-msg-bubble audio { height: 32px; max-width: 200px; }
+.voice-msg-duration { font-size: .72rem; color: var(--text2); white-space: nowrap; }
+
+/* Offer card */
+.offer-card { box-shadow: 0 0 0 2.5px var(--orange) !important; }
+.offer-card .mkt-img-wrap::after { content: '🔥 Oferta'; position: absolute; top: 8px; left: 8px; background: var(--orange); color: #fff; font-size: .68rem; font-weight: 800; padding: 3px 8px; border-radius: 20px; font-family: var(--font-head); }
+
+/* Debate card */
+.debate-card { border-left: 3px solid var(--purple) !important; }
+.debate-side-btn:hover { transform: translateY(-1px); box-shadow: var(--sh2); }
+
+/* Challenge card */
+.challenge-card { background: linear-gradient(135deg, var(--card), rgba(245,158,11,.04)) !important; }
+
+/* Group stats card */
+.group-stats-card { border: 1px solid var(--border); }
+
+/* Leaderboard */
+.lb-me { position: sticky; top: 0; z-index: 1; }
+
+/* Streak badge */
+.streak-badge { animation: streak-pulse 2.5s ease-in-out infinite; }
+@keyframes streak-pulse { 0%,100%{box-shadow:none;opacity:1} 50%{box-shadow:0 0 10px rgba(245,158,11,.5);opacity:.9} }
+
+/* Heatmap */
+.heatmap-container { overflow-x: auto; }
+
+/* Slideshow overlay */
+#slideshow-overlay button { transition: .15s; }
+#slideshow-overlay button:hover { opacity: .8; transform: scale(1.05); }
+
+/* Push notif special toast */
+.push-notif-toast { display: flex !important; align-items: center; gap: 8px; cursor: pointer; }
+.push-notif-toast:hover { transform: translateX(-4px) !important; }
+
+/* Rating stars */
+.star-btn { display: inline-block; transition: transform .15s; }
+.star-btn:hover { transform: scale(1.2); }
+
+/* DND badge */
+#dnd-badge { box-shadow: 0 0 0 2px var(--card); }
+
+/* Search date filter select */
+#search-date-filter { max-width: 130px; }

@@ -115,6 +115,7 @@
           <div class="nav-item" data-view="channels" onclick="navigate('channels')"><span class="nicon"><i class="fas fa-hashtag"></i></span>Servidor<span class="tag tag-green" style="margin-left:auto;font-size:.6rem;">comunitario</span></div>
           <div class="nav-item" data-view="watch" onclick="navigate('watch')"><span class="nicon"><i class="fas fa-tv"></i></span>Watch<span class="tag tag-purple" style="margin-left:auto;font-size:.6rem;">Video</span></div>
           <div class="nav-item" data-view="friends" onclick="navigate('friends')"><span class="nicon"><i class="fas fa-user-friends"></i></span>Amigos</div>
+          <div class="nav-item" data-view="leaderboard" onclick="navigate('leaderboard')"><span class="nicon"><i class="fas fa-trophy"></i></span>Leaderboard<span class="tag tag-orange" style="margin-left:auto;font-size:.6rem;">Semanal</span></div>
           <div class="nav-item" data-view="settings" onclick="navigate('settings')"><span class="nicon"><i class="fas fa-gear"></i></span>Configuración</div>
           <div id="mod-nav-item" class="nav-item" data-view="moderation" onclick="navigate('moderation')" style="display:none;"><span class="nicon"><i class="fas fa-shield-halved"></i></span>Moderación<span class="nav-badge" id="mod-badge" style="display:none"></span></div>
         </div>
@@ -622,5 +623,19 @@
 <div id="reel-viewer-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#000;flex-direction:column;align-items:stretch;justify-content:stretch;" onclick="if(event.target===this)closeReelViewer();">
 </div>
 
+<!-- FEATURES v2.0 MODALS -->
+
+<!-- Story rating modal (for buyer reviews) -->
+<div class="modal" id="seller-rating-modal">
+  <div class="mbox" style="max-width:420px;">
+    <div class="mhead"><h3><i class="fas fa-star" style="color:var(--orange);"></i> Valorar vendedor</h3><button class="btn-icon" onclick="closeModal('seller-rating-modal')"><i class="fas fa-times"></i></button></div>
+    <div class="mbody" id="seller-rating-body"></div>
+  </div>
+</div>
+
+<!-- Slideshow hint modal -->
+<div id="slideshow-hint" style="display:none;"></div>
+
 <script src="script.js" defer></script>
+<script src="features.js" defer></script>
 </body>
