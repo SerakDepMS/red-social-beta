@@ -313,10 +313,12 @@
 </div>
 
 <!-- Lightbox -->
-<div id="lightbox-modal" class="modal">
-  <div style="max-width:92vw;max-height:92vh;position:relative;">
-    <img id="lb-img" class="lightbox-img" src="" alt="">
-    <button class="sv-close" style="position:fixed;top:14px;right:14px;" onclick="closeModal('lightbox-modal')"><i class="fas fa-times"></i></button>
+<div id="lightbox-modal" class="modal" onclick="if(event.target===this)closeModal('lightbox-modal')">
+  <div style="max-width:94vw;max-height:94vh;position:relative;display:flex;align-items:center;justify-content:center;">
+    <img id="lb-img" class="lightbox-img" src="" alt="" style="display:none;max-width:94vw;max-height:90vh;border-radius:10px;object-fit:contain;">
+    <video id="lb-video" controls src="" style="display:none;max-width:94vw;max-height:90vh;border-radius:10px;background:#000;"></video>
+    <audio id="lb-audio" controls src="" style="display:none;width:min(420px,90vw);"></audio>
+    <button class="sv-close" style="position:fixed;top:14px;right:14px;z-index:10;" onclick="closeModal('lightbox-modal')"><i class="fas fa-times"></i></button>
   </div>
 </div>
 

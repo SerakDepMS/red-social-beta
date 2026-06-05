@@ -2663,9 +2663,9 @@ function renderChatArea(conv){
     }
     let mediaH='';
     if(m.media){
-      if(m.media.type==='image') mediaH=`<img src="${m.media.data}" style="max-width:220px;max-height:200px;border-radius:10px;display:block;margin-bottom:4px;cursor:pointer;" onclick="window.open(this.src)">`;
-      else if(m.media.type==='video') mediaH=`<video src="${m.media.data}" controls style="max-width:220px;border-radius:10px;display:block;margin-bottom:4px;"></video>`;
-      else if(m.media.type==='audio') mediaH=`<audio src="${m.media.data}" controls style="max-width:220px;margin-bottom:4px;display:block;"></audio>`;
+      if(m.media.type==='image') mediaH=`<img src="${m.media.data}" class="chat-media-img" onclick="openMediaLB(this,'image')" alt="">`;
+      else if(m.media.type==='video') mediaH=`<div class="chat-media-video-wrap"><video src="${m.media.data}" class="chat-media-video" preload="metadata"></video><button class="chat-media-play-btn" onclick="openMediaLB(this.previousElementSibling,'video')"><i class="fas fa-play"></i></button></div>`;
+      else if(m.media.type==='audio') mediaH=`<audio src="${m.media.data}" controls class="chat-media-audio"></audio>`;
     }
     const rxnMap=m.reactions||{};
     const rxnSummary=Object.entries(rxnMap).map(([e,uids])=>`<span class="brxn">${e} ${uids.length}</span>`).join('');
@@ -3261,9 +3261,26 @@ function toast(msg,type='info'){
   setTimeout(()=>{t.style.animation='tIn .28s ease reverse';setTimeout(()=>t.remove(),300);},3500);
 }
 function openLB(src){
-  const el=document.getElementById('lb-img');
-  if(!el)return;
-  el.src=src;
+  const img=document.getElementById('lb-img');
+  const vid=document.getElementById('lb-video');
+  const aud=document.getElementById('lb-audio');
+  if(img){img.style.display='none';img.src='';}
+  if(vid){vid.style.display='none';vid.pause();vid.src='';}
+  if(aud){aud.style.display='none';aud.pause();aud.src='';}
+  if(img){img.src=src;img.style.display='block';}
+  openModal('lightbox-modal');
+}
+function openMediaLB(el, type){
+  const src = el.src || el.currentSrc || '';
+  const img=document.getElementById('lb-img');
+  const vid=document.getElementById('lb-video');
+  const aud=document.getElementById('lb-audio');
+  if(img){img.style.display='none';img.src='';}
+  if(vid){vid.style.display='none';vid.pause();vid.src='';}
+  if(aud){aud.style.display='none';aud.pause();aud.src='';}
+  if(type==='image'&&img){img.src=src;img.style.display='block';}
+  else if(type==='video'&&vid){vid.src=src;vid.style.display='block';}
+  else if(type==='audio'&&aud){aud.src=src;aud.style.display='block';}
   openModal('lightbox-modal');
 }
 // Helper: store full src in a data attribute and open lightbox from it
@@ -3279,6 +3296,12 @@ function openLBFull(elOrId){
 }
 function openModal(id){document.getElementById(id)?.classList.add('open');}
 function closeModal(id){
+  if(id==='lightbox-modal'){
+    const vid=document.getElementById('lb-video');
+    const aud=document.getElementById('lb-audio');
+    if(vid){vid.pause();vid.src='';}
+    if(aud){aud.pause();aud.src='';}
+  }
   if (id === 'story-viewer-modal') {
     clearTimeout(svTimer);
     const vid = document.getElementById('sv-video-player');
@@ -4102,8 +4125,8 @@ function renderChannelMsgs(msgs, chId){
     const rxnHtml = Object.entries(rxns).length?`<div class="ch-msg-rxns">${Object.entries(rxns).map(([e,uids])=>`<button class="ch-rxn-btn ${uids.includes(CU.id)?'mine':''}" onclick="addChMsgRxn(${chId},${m.ts},'${e}')">${e} ${uids.length}</button>`).join('')}</div>`:'';
     let mediaHtml='';
     if(m.media){
-      if(m.media.type==='image') mediaHtml=`<img src="${m.media.data}" style="max-width:300px;max-height:220px;border-radius:var(--r-md);display:block;margin-top:4px;cursor:pointer;" onclick="openLB('${m.media.data}')">`;
-      else if(m.media.type==='video') mediaHtml=`<video src="${m.media.data}" controls style="max-width:300px;border-radius:var(--r-md);display:block;margin-top:4px;"></video>`;
+      if(m.media.type==='image') mediaHtml=`<img src="${m.media.data}" class="chat-media-img" onclick="openMediaLB(this,'image')" alt="">`;
+      else if(m.media.type==='video') mediaHtml=`<div class="chat-media-video-wrap"><video src="${m.media.data}" class="chat-media-video" preload="metadata"></video><button class="chat-media-play-btn" onclick="openMediaLB(this.previousElementSibling,'video')"><i class="fas fa-play"></i></button></div>`;
     }
     const replyHtml = m.replyTo?(()=>{
       const orig = msgs.find(x=>x.ts===m.replyTo);

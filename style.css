@@ -548,6 +548,13 @@ body.noscroll {
 .bubble.ephemeral{opacity:.85;border:1px dashed var(--orange);}
 .bubble.ephemeral-mine{background:rgba(22,163,74,.6);}
 .btime{font-size:.65rem;opacity:.65;margin-top:2px;}
+/* Chat multimedia adaptativo */
+.chat-media-img{display:block;max-width:100%;max-height:280px;width:auto;height:auto;border-radius:10px;margin-bottom:5px;cursor:pointer;object-fit:contain;}
+.chat-media-video-wrap{position:relative;display:inline-block;max-width:100%;margin-bottom:5px;}
+.chat-media-video{display:block;max-width:100%;max-height:280px;width:auto;height:auto;border-radius:10px;object-fit:contain;background:#000;pointer-events:none;}
+.chat-media-play-btn{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.38);border:none;border-radius:10px;cursor:pointer;color:#fff;font-size:1.6rem;transition:.15s;}
+.chat-media-play-btn:hover{background:rgba(0,0,0,.58);}
+.chat-media-audio{display:block;width:100%;max-width:260px;margin-bottom:5px;}
 /* Contador efímero */
 .eph-countdown{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;font-weight:700;color:var(--orange);margin-top:3px;}
 .eph-ring{position:relative;width:18px;height:18px;flex-shrink:0;}
@@ -757,10 +764,10 @@ body.noscroll {
 
   body.sidebar-pinned .left-sidebar {
     position: sticky !important;
-    top: var(--hh) !important;
+    top: calc(var(--hh) + 18px) !important;
     left: auto !important;
     width: var(--sidebar) !important;
-    height: calc(100vh - var(--hh)) !important;
+    height: calc(100vh - var(--hh) - 18px) !important;
     overflow-y: auto !important;
     box-shadow: none !important;
     transition: none !important;
@@ -775,17 +782,6 @@ body.noscroll {
   /* Encabezado del menú izquierdo se muestra en modo cajón y se oculta al fijar. */
   .left-sidebar .mobile-sidebar-header { display: flex !important; }
   body.sidebar-pinned .left-sidebar .mobile-sidebar-header { display: none !important; }
-
-  /* Alineación vertical: el main tiene padding-top:18px del grid,
-     el sidebar sticky empieza en top:var(--hh) sin ese offset.
-     Compensamos empujando solo la primera tarjeta del sidebar. */
-  body.sidebar-pinned #pc-card { margin-top: 18px; }
-
-  /* Settings panel: su padding-top:22px añade desfase extra vs el foro */
-  body.sidebar-pinned .sets-panel { padding-top: 0 !important; }
-  body.sidebar-pinned .sets-panel h3 { margin-top: 22px !important; }
-
-  /* Story viewer: respetar el header */
   #story-viewer-modal { top: var(--hh) !important; }
   .sv-wrap { height: min(570px, calc(100vh - var(--hh) - 28px)) !important; }
 }
