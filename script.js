@@ -1134,44 +1134,111 @@ function clearMedia(ctx){
 function openPollCreatorCtx(ctx,groupId){pendingPollGroup=groupId;pendingPollCtx=ctx;openModal('poll-create-modal');}
 let pendingPollCtx='public';
 
-function publishPost(ctx,groupId){
-  const text=val(`ct-${ctx}`).trim(),media=compMedia[ctx];
-  if(!text&&!media){toast('Escribe algo o adjunta un archivo','warning');return;}
-  const priv=val(`cpriv-${ctx}`)||'public';
-  // Scheduled post support
-  const schedEl=document.getElementById(`csched-${ctx}`);
-  const schedVal=schedEl?schedEl.value:'';
-  const isScheduled=!!schedVal;
-  const schedTime=schedVal?new Date(schedVal).getTime():null;
-  if(isScheduled&&schedTime&&schedTime<=Date.now()){toast('La fecha programada debe ser futura','warning');return;}
-  const p={id:ids.np++,userId:CU.id,content:text,timestamp:isScheduled?schedTime:Date.now(),reactions:{},comments:[],reposts:[],savedBy:[],editHistory:[],
-    media:media?media.data:null,mediaType:media?media.type:null,
-    pinned:false,groupId:groupId||null,isPoll:false,privacy:priv,isRepost:false,
-    status:isScheduled?'scheduled':'published',scheduledAt:schedTime};
-  posts.unshift(p);compMedia[ctx]=null;
-  document.getElementById(`ct-${ctx}`).value='';
+function publishPost(ctx, groupId) {
+  // AUTO-DETECCIÓN: si ctx es undefined, buscar el composer activo
+  if (!ctx || ctx === 'undefined') {
+    const composerElem = document.querySelector('.composer');
+    if (composerElem && composerElem.id) {
+      const match = composerElem.id.match(/comp-(.+)/);
+      if (match) ctx = match[1];
+    }
+  }
+  
+  // Validación final
+  if (!ctx) {
+    toast('Error: no se pudo identificar el compositor', 'error');
+    console.error('publishPost llamado sin ctx válido');
+    return;
+  }
+  
+  const textarea = document.getElementById(`ct-${ctx}`);
+  if (!textarea) {
+    toast(`Error: no se encontró el área de texto para "${ctx}"`, 'error');
+    return;
+  }
+  
+  const text = textarea.value.trim();
+  const media = compMedia[ctx];
+  
+  if (!text && !media) {
+    toast('Escribe algo o adjunta un archivo', 'warning');
+    return;
+  }
+  
+  const priv = document.getElementById(`cpriv-${ctx}`)?.value || 'public';
+  
+  // Programación
+  const schedEl = document.getElementById(`csched-${ctx}`);
+  const schedVal = schedEl?.value || '';
+  const isScheduled = !!schedVal;
+  const schedTime = schedVal ? new Date(schedVal).getTime() : null;
+  if (isScheduled && schedTime && schedTime <= Date.now()) {
+    toast('La fecha programada debe ser futura', 'warning');
+    return;
+  }
+  
+  // Asegurar que ids.np existe
+  if (typeof ids.np !== 'number' || isNaN(ids.np)) ids.np = 1;
+  
+  const newPost = {
+    id: ids.np++,
+    userId: CU.id,
+    content: text,
+    timestamp: isScheduled ? schedTime : Date.now(),
+    reactions: {},
+    comments: [],
+    reposts: [],
+    savedBy: [],
+    editHistory: [],
+    media: media ? media.data : null,
+    mediaType: media ? media.type : null,
+    pinned: false,
+    groupId: groupId || null,
+    isPoll: false,
+    privacy: priv,
+    isRepost: false,
+    status: isScheduled ? 'scheduled' : 'published',
+    scheduledAt: schedTime
+  };
+  
+  posts.unshift(newPost);
+  
+  // Limpiar
+  compMedia[ctx] = null;
+  textarea.value = '';
   clearMedia(ctx);
-  if(schedEl)schedEl.value='';
-  const sw=document.getElementById(`sched-wrap-${ctx}`);
-  if(sw)sw.style.display='none';
-  const ux=users.find(u=>u.id===CU.id);
-  if(ux){['followers','following','blocked','savedPosts','privacy'].forEach(k=>{if(ux[k]!==undefined)ux[k]=CU[k];});}
-  logActivity('post',text.substring(0,50));
+  if (schedEl) schedEl.value = '';
+  const sw = document.getElementById(`sched-wrap-${ctx}`);
+  if (sw) sw.style.display = 'none';
+  
+  // Sincronizar usuario
+  const ux = users.find(u => u.id === CU.id);
+  if (ux) {
+    ['followers','following','blocked','savedPosts','privacy'].forEach(k => {
+      if (ux[k] !== undefined) ux[k] = CU[k];
+    });
+  }
+  
+  logActivity('post', text.substring(0,50));
   checkBadges(CU.id);
-  // Mention detection
-  const mentions=(text.match(/@([a-zA-Z0-9_]+)/g)||[]).map(m=>m.slice(1));
-  mentions.forEach(name=>{
-    const mu=users.find(u=>u.username===name);
-    if(mu&&mu.id!==CU.id)addNotif(mu.id,'mention',CU.id,{postId:p.id});
+  
+  // Menciones
+  const mentions = (text.match(/@([a-zA-Z0-9_]+)/g) || []).map(m => m.slice(1));
+  mentions.forEach(name => {
+    const mu = users.find(u => u.username === name);
+    if (mu && mu.id !== CU.id) addNotif(mu.id, 'mention', CU.id, { postId: newPost.id });
   });
-  save();
-  if(isScheduled){
-    toast(`⏰ Post programado para ${new Date(schedTime).toLocaleString('es-ES')} ✅`,'success');
-    if(cView==='scheduled')renderScheduledPostsPage();
+  
+  try { save(); } catch(e) { console.error('Save error', e); toast('Error al guardar', 'error'); return; }
+  
+  if (isScheduled) {
+    toast(`⏰ Post programado para ${new Date(schedTime).toLocaleString('es-ES')} ✅`, 'success');
+    if (cView === 'scheduled') renderScheduledPostsPage();
   } else {
-    if(groupId)renderGroupFeed(groupId);else renderFeed();
+    if (groupId) renderGroupFeed(groupId);
+    else renderFeed();
     renderTrendingHashtags();
-    toast('¡Publicado! 🎉','success');
+    toast('¡Publicado! 🎉', 'success');
   }
 }
 
@@ -1532,36 +1599,82 @@ function refreshPostOrFeed(p){if(p.groupId)renderGroupFeed(p.groupId);else rende
 // ═══════════════════════════════════════════
 //  MODERATION PANEL
 // ═══════════════════════════════════════════
-function renderModerationPanel(){
-  if(!PRIVILEGED.includes(CU.role||''))return;
-  const mc=document.getElementById('content');
-  const pending=reports.filter(r=>r.status==='pending');
-  mc.innerHTML=`<div style="margin-bottom:14px;display:flex;align-items:center;gap:9px;">
-    <h3 style="font-family:var(--font-head);font-weight:800;"><i class="fas fa-shield-halved" style="color:var(--orange);margin-right:7px;"></i>Panel de Moderación</h3>
-    <span class="tag tag-orange">${pending.length} pendientes</span>
-  </div>
-  <div class="card" style="padding:16px;">
-    <h4 style="font-family:var(--font-head);font-weight:700;margin-bottom:13px;">Reportes pendientes</h4>
-    ${pending.length?pending.map(r=>{
-      const byU=users.find(u=>u.id===r.by);
-      let targetDesc='';
-      if(r.type==='post'){const p=posts.find(x=>x.id===r.id);const au=users.find(u=>u.id===p?.userId);targetDesc=`Post de ${au?.username||'?'}: "${p?.content?.substring(0,50)||'[media]'}"`;}
-      else if(r.type==='comment'){targetDesc=`Comentario #${r.id}`;}
-      return `<div class="report-item">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:7px;">
-          <div>
-            <div style="font-size:.78rem;color:var(--text2);margin-bottom:3px;">Por: <strong>${esc(byU?.username||'')}</strong> · ${timeAgo(r.timestamp)}</div>
-            <div style="font-size:.85rem;font-weight:600;margin-bottom:3px;">${esc(targetDesc)}</div>
-            <div style="font-size:.82rem;color:var(--text2);">Motivo: ${esc(r.reason)}</div>
+function renderModerationPanel() {
+  if (!PRIVILEGED.includes(CU.role || '')) return;
+  const mc = document.getElementById('content');
+  const pending = reports.filter(r => r.status === 'pending');
+  
+  mc.innerHTML = `
+    <div style="margin-bottom:14px;display:flex;align-items:center;gap:9px;">
+      <h3 style="font-family:var(--font-head);font-weight:800;"><i class="fas fa-shield-halved" style="color:var(--orange);margin-right:7px;"></i>Panel de Moderación</h3>
+      <span class="tag tag-orange">${pending.length} pendientes</span>
+    </div>
+    <div class="card" style="padding:16px;">
+      <h4 style="font-family:var(--font-head);font-weight:700;margin-bottom:13px;">Reportes pendientes</h4>
+      ${pending.length ? pending.map(r => {
+        const byU = users.find(u => u.id === r.by);
+        let targetDesc = '';
+        let viewButton = '';
+        
+        if (r.type === 'post') {
+          const p = posts.find(x => x.id === r.id);
+          const au = users.find(u => u.id === p?.userId);
+          if (p) {
+            // Mostrar contenido real
+            if (p.content) {
+              targetDesc = `Post de ${esc(au?.username || '?')}: "${esc(p.content.substring(0, 100))}${p.content.length > 100 ? '…' : ''}"`;
+            } else if (p.media) {
+              const mediaType = p.mediaType || (p.media.startsWith('data:image') ? 'image' : 'file');
+              const mediaIcon = mediaType === 'image' ? '🖼️ Imagen' : (mediaType === 'video' ? '🎬 Vídeo' : (mediaType === 'audio' ? '🎵 Audio' : '📎 Archivo'));
+              targetDesc = `Post de ${esc(au?.username || '?')}: [${mediaIcon}]`;
+              // Añadir miniatura si es imagen
+              if (mediaType === 'image' && p.media && p.media.length < 500) {
+                targetDesc += ` <img src="${p.media}" style="max-height:40px; max-width:60px; border-radius:4px; vertical-align:middle; margin-left:5px;">`;
+              }
+            } else {
+              targetDesc = `Post de ${esc(au?.username || '?')}: [Sin contenido]`;
+            }
+            viewButton = `<button class="btn btn-ghost" style="font-size:.72rem; padding:3px 8px;" onclick="viewReportedContent('post', ${r.id})"><i class="fas fa-eye"></i> Ver</button>`;
+          } else {
+            targetDesc = `Post eliminado (ID ${r.id})`;
+          }
+        } 
+        else if (r.type === 'comment') {
+          // Buscar el comentario en todos los posts
+          let found = false;
+          for (const post of posts) {
+            const comment = post.comments.find(c => c.id === r.id);
+            if (comment) {
+              const au = users.find(u => u.id === comment.userId);
+              targetDesc = `Comentario de ${esc(au?.username || '?')} en post de ${esc(users.find(u=>u.id===post.userId)?.username||'?')}: "${esc(comment.text.substring(0, 100))}"`;
+              viewButton = `<button class="btn btn-ghost" style="font-size:.72rem; padding:3px 8px;" onclick="viewReportedContent('comment', ${r.id}, ${post.id})"><i class="fas fa-eye"></i> Ver</button>`;
+              found = true;
+              break;
+            }
+          }
+          if (!found) targetDesc = `Comentario eliminado (ID ${r.id})`;
+        }
+        
+        return `
+          <div class="report-item" style="margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:7px;">
+              <div style="flex:1;">
+                <div style="font-size:.78rem; color:var(--text2); margin-bottom:3px;">Reportado por: <strong>${esc(byU?.username || '?')}</strong> · ${timeAgo(r.timestamp)}</div>
+                <div style="font-size:.85rem; font-weight:600; margin-bottom:3px; background:var(--input-bg); padding:6px 10px; border-radius:var(--r-md); word-break:break-word;">${targetDesc}</div>
+                <div style="font-size:.82rem; color:var(--text2);">Motivo: ${esc(r.reason)}</div>
+              </div>
+              <div style="display:flex; gap:5px; flex-wrap:wrap; align-items:center;">
+                ${viewButton}
+                <button class="btn btn-ghost" style="font-size:.75rem;padding:4px 9px;" onclick="ignoreReport(${r.id})">Ignorar</button>
+                ${r.type === 'post' ? `<button class="btn btn-danger" onclick="deleteFromReport(${r.id})">Eliminar contenido</button>` : ''}
+                ${r.type === 'comment' ? `<button class="btn btn-danger" onclick="deleteCommentFromReport(${r.id})">Eliminar comentario</button>` : ''}
+              </div>
+            </div>
           </div>
-          <div style="display:flex;gap:5px;flex-wrap:wrap;">
-            <button class="btn btn-ghost" style="font-size:.75rem;padding:4px 9px;" onclick="ignoreReport(${r.id})">Ignorar</button>
-            ${r.type==='post'?`<button class="btn btn-danger" onclick="deleteFromReport(${r.id})">Eliminar contenido</button>`:''}
-          </div>
-        </div>
-      </div>`;
-    }).join(''):`<div class="empty"><i class="fas fa-check-circle" style="color:var(--green);opacity:1;"></i><p>Sin reportes pendientes</p></div>`}
-  </div>`;
+        `;
+      }).join('') : `<div class="empty"><i class="fas fa-check-circle" style="color:var(--green);opacity:1;"></i><p>Sin reportes pendientes</p></div>`
+    }
+    </div>`;
 }
 function ignoreReport(rId){
   const r=reports.find(x=>x.id===rId);if(r)r.status='ignored';save();renderModerationPanel();toast('Reporte ignorado','info');
@@ -1579,6 +1692,98 @@ function suspendUser(days){
 function liftSuspension(){
   const u=users.find(x=>x.id===activeProfileId);if(!u)return;
   u.suspendedUntil=null;save();toast('Suspensión levantada','info');openProfileModal(activeProfileId);
+}
+
+// Función para ver el contenido reportado (post o comentario)
+function viewReportedContent(type, id, postId = null) {
+  const bodyDiv = document.getElementById('report-view-body');
+  if (!bodyDiv) {
+    console.error('No se encontró report-view-body');
+    toast('Error: modal no disponible', 'error');
+    return;
+  }
+  
+  if (type === 'post') {
+    const post = posts.find(p => p.id === id);
+    if (!post) {
+      bodyDiv.innerHTML = `<div class="empty"><i class="fas fa-trash"></i><p>El post ya no existe</p></div>`;
+      openModal('report-view-modal');
+      return;
+    }
+    const author = users.find(u => u.id === post.userId);
+    let mediaHtml = '';
+    if (post.media) {
+      if (post.mediaType === 'image') {
+        mediaHtml = `<img src="${post.media}" style="max-width:100%; max-height:300px; border-radius:var(--r-md); margin-top:10px;">`;
+      } else if (post.mediaType === 'video') {
+        mediaHtml = `<video src="${post.media}" controls style="max-width:100%; max-height:300px; margin-top:10px;"></video>`;
+      } else if (post.mediaType === 'audio') {
+        mediaHtml = `<audio src="${post.media}" controls style="width:100%; margin-top:10px;"></audio>`;
+      }
+    }
+    bodyDiv.innerHTML = `
+      <div style="margin-bottom:8px;">
+        <strong>Autor:</strong> ${esc(author?.username || 'Desconocido')} (ID: ${post.userId})<br>
+        <strong>Fecha:</strong> ${new Date(post.timestamp).toLocaleString()}<br>
+        <strong>Contenido textual:</strong>
+        <div style="background:var(--input-bg); padding:10px; border-radius:var(--r-md); margin:6px 0;">${post.content ? esc(post.content) : '<em>Sin texto</em>'}</div>
+        ${mediaHtml}
+      </div>
+    `;
+  } 
+  else if (type === 'comment' && postId) {
+    const post = posts.find(p => p.id === postId);
+    if (!post) {
+      bodyDiv.innerHTML = `<div class="empty"><i class="fas fa-trash"></i><p>El post ya no existe</p></div>`;
+      openModal('report-view-modal');
+      return;
+    }
+    const comment = post.comments.find(c => c.id === id);
+    if (!comment) {
+      bodyDiv.innerHTML = `<div class="empty"><i class="fas fa-trash"></i><p>El comentario ya no existe</p></div>`;
+      openModal('report-view-modal');
+      return;
+    }
+    const author = users.find(u => u.id === comment.userId);
+    const postAuthor = users.find(u => u.id === post.userId);
+    bodyDiv.innerHTML = `
+      <div style="margin-bottom:8px;">
+        <strong>Autor del comentario:</strong> ${esc(author?.username || 'Desconocido')} (ID: ${comment.userId})<br>
+        <strong>Comentario:</strong>
+        <div style="background:var(--input-bg); padding:10px; border-radius:var(--r-md); margin:6px 0;">${esc(comment.text)}</div>
+        <hr class="div">
+        <strong>Post original:</strong> Por ${esc(postAuthor?.username || 'Desconocido')}<br>
+        <div style="background:var(--input-bg); padding:8px; border-radius:var(--r-md); margin-top:5px;">${post.content ? esc(post.content.substring(0,200)) : '<em>Sin texto</em>'}</div>
+      </div>
+    `;
+  } else {
+    bodyDiv.innerHTML = `<div class="empty"><i class="fas fa-question-circle"></i><p>Tipo de contenido no soportado</p></div>`;
+  }
+  openModal('report-view-modal');
+}
+
+// Función para eliminar un comentario desde el panel de reportes
+function deleteCommentFromReport(reportId) {
+  const report = reports.find(r => r.id === reportId);
+  if (!report || report.type !== 'comment') return;
+  let deleted = false;
+  for (let i = 0; i < posts.length; i++) {
+    const post = posts[i];
+    const commentIndex = post.comments.findIndex(c => c.id === report.id);
+    if (commentIndex !== -1) {
+      post.comments.splice(commentIndex, 1);
+      deleted = true;
+      break;
+    }
+  }
+  if (deleted) {
+    report.status = 'resolved';
+    save();
+    renderModerationPanel();
+    toast('Comentario eliminado', 'info');
+  } else {
+    toast('Comentario no encontrado', 'warning');
+  }
 }
 
 // ═══════════════════════════════════════════

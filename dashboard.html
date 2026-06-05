@@ -636,6 +636,19 @@
 <!-- Slideshow hint modal -->
 <div id="slideshow-hint" style="display:none;"></div>
 
+<!-- Modal para ver contenido reportado -->
+<div id="report-view-modal" class="modal">
+  <div class="mbox" style="max-width:550px;">
+    <div class="mhead">
+      <h3><i class="fas fa-eye"></i> Contenido reportado</h3>
+      <button class="mclose" onclick="closeModal('report-view-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="mbody" id="report-view-body">
+      <!-- Aquí se cargará el contenido dinámicamente -->
+    </div>
+  </div>
+</div>
+
 <script src="script.js" defer></script>
 <script src="features.js" defer></script>
 </body>
