@@ -27,7 +27,8 @@ let activeMentionInput=null;
 
 const PRIVILEGED=['Fundador','Líder','Soporte Técnico','Admin'];
 const MAX_FILE_SIZE=50*1024*1024; // 50MB
-const ALLOWED_TYPES=['image/jpeg','image/png','image/gif','image/webp','video/mp4','video/webm','audio/mpeg','audio/ogg','audio/wav'];
+// Accept any image/video/audio MIME type
+const ALLOWED_TYPES_PREFIX=['image/','video/','audio/'];
 
 const BADGES_DEF=[
   {id:'first_post',icon:'✍️',label:'Primera publicación'},
@@ -1009,7 +1010,8 @@ function handleDrop(e,ctx){
 }
 function validateFile(file){
   if(file.size>MAX_FILE_SIZE){toast('El archivo supera el límite de 50MB','warning');return false;}
-  if(!ALLOWED_TYPES.includes(file.type)){toast('Tipo de archivo no soportado','warning');return false;}
+  const mime=file.type||'';
+  if(!ALLOWED_TYPES_PREFIX.some(p=>mime.startsWith(p))){toast('Solo se permiten archivos de imagen, video o audio','warning');return false;}
   if(file.size>2*1024*1024){toast('Nota: Archivos de más de 2MB se guardarán de forma temporal en tu sesión actual y no se conservarán al recargar.','info');}
   return true;
 }
@@ -1107,9 +1109,9 @@ function postCard(p){
 
   let mediaH='';
   if(p.media){
-    if(p.mediaType==='image')mediaH=`<div class="p-media" style="cursor:pointer;" onclick="openLB('${p.media.replace(/'/g,"\\'")}')"><img src="${p.media}" alt="media" loading="lazy"></div>`;
+    if(p.mediaType==='image')mediaH=`<div class="p-media" style="cursor:pointer;" onclick="openLB(this.querySelector('img').src)"><img src="${p.media}" alt="media" loading="lazy"></div>`;
     else if(p.mediaType==='video')mediaH=`<div class="p-media"><video controls src="${p.media}"></video></div>`;
-    else if(p.mediaType==='audio')mediaH=`<div class="p-media" style="padding:8px 14px;"><audio controls src="${p.media}" style="width:100%;"></audio><button class="mb" style="margin-top:5px;" onclick="openMP('${p.media.substring(0,80)}','${esc(author.username)}')"><i class="fas fa-music"></i> Mini reproductor</button></div>`;
+    else if(p.mediaType==='audio')mediaH=`<div class="p-media"><audio controls src="${p.media}"></audio><button class="mb" style="margin:4px 14px 8px;" onclick="openMP('${p.media.substring(0,80)}','${esc(author.username)}')"><i class="fas fa-music"></i> Mini reproductor</button></div>`;
   }
   let repostH='';
   if(p.isRepost&&originalPost){
@@ -1279,11 +1281,12 @@ function addRxn(postId,rxn){
 function addCmt(postId){
   const inp=document.getElementById(`ci-${postId}`);if(!inp||!inp.value.trim())return;
   const p=posts.find(x=>x.id===postId);if(!p)return;
-  const c={id:Date.now(),userId:CU.id,text:inp.value.trim(),timestamp:Date.now()};
+  const text=inp.value.trim();
+  const c={id:Date.now(),userId:CU.id,text,timestamp:Date.now()};
   p.comments.push(c);
   if(p.userId!==CU.id)addNotif(p.userId,'comment',CU.id,{postId});
   inp.value='';
-  logActivity('comment',inp.value.substring(0,50));
+  logActivity('comment',text.substring(0,50));
   save();
   const s=document.getElementById(`cmts-${postId}`);if(s)s.innerHTML=renderCmts(p);
 }
@@ -1537,7 +1540,7 @@ function openProfileModal(uid){
     const isMutual=isF&&(u.followers||[]).includes(CU.id);
     acts.innerHTML=`
       <button class="btn btn-primary" id="fb-${u.id}" onclick="toggleFollow(${u.id})">${isF?'Dejar de seguir':'Seguir'}</button>
-      ${isMutual?`<button class="btn btn-ghost" onclick="navigate('messages');openChat(${u.id});closeModal('profile-modal')"><i class="fas fa-comment"></i> Mensaje</button>`:''}
+      ${isMutual?`<button class="btn btn-ghost" onclick="navigate('messages');setTimeout(()=>openChat(${u.id}),300);closeModal('profile-modal')"><i class="fas fa-comment"></i> Mensaje</button>`:''}
       <button class="btn ${isMuted?'btn-danger':'btn-ghost'}" onclick="toggleMuteUser(${u.id})" title="${isMuted?'Dessilenciar':'Silenciar'}"><i class="fas fa-volume-${isMuted?'up':'mute'}"></i></button>
       <button class="btn ${isB?'btn-danger':'btn-ghost'}" onclick="toggleBlock(${u.id})" title="${isB?'Desbloquear':'Bloquear'}"><i class="fas fa-ban"></i></button>`;
     editS.style.display='none';
@@ -1667,7 +1670,7 @@ function switchPTab(tab,uid){
   if(tab==='posts')c.innerHTML=myP.map(postCard).join('')||empty('fas fa-pen-to-square','Sin publicaciones.');
   else if(tab==='photos'){
     const photos=myP.filter(p=>p.mediaType==='image'&&p.media);
-    c.innerHTML=`<div class="card" style="padding:13px;"><div class="photo-grid">${photos.map(p=>`<img src="${p.media}" alt="" onclick="openLB('${p.media.substring(0,80)}')" loading="lazy">`).join('')}</div>${!photos.length?empty('fas fa-images','Sin fotos.'):''}`;
+    c.innerHTML=`<div class="card" style="padding:13px;"><div class="photo-grid">${photos.map(p=>`<img src="${p.media}" alt="" onclick="openLB(this.src)" loading="lazy">`).join('')}</div>${!photos.length?empty('fas fa-images','Sin fotos.'):''}`;
   }else if(tab==='groups'){
     const gp=groups.filter(g=>g.members.includes(u.id));
     c.innerHTML=`<div class="card" style="padding:13px;">${gp.map(g=>`<div class="gchip" onclick="navigate('groups',${g.id})"><span class="gicon"><i class="fas fa-users"></i></span>${esc(g.name)}</div>`).join('')||empty('fas fa-users','Sin grupos.')}</div>`;
@@ -1702,7 +1705,6 @@ function renderActivityTab(uid,c){
   c.innerHTML=html;
 }
 function filterActivity(type,btn,uid){
-  document.querySelectorAll('#activity-list').forEach(()=>{});
   const list=document.getElementById('activity-list');if(!list)return;
   btn.closest('.card').querySelectorAll('.tab-pill').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
@@ -1731,7 +1733,8 @@ function storyTab(t){
     const panel=document.getElementById(`sp-${x}`);if(panel)panel.style.display=x===t?'block':'none';
   });
 }
-document.getElementById('si-file').addEventListener('change',e=>{
+const _siFile=document.getElementById('si-file');
+if(_siFile)_siFile.addEventListener('change',e=>{
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();r.onload=ev=>{document.getElementById('si-el').src=ev.target.result;document.getElementById('si-prev').style.display='block';};r.readAsDataURL(f);
 });
@@ -1837,22 +1840,193 @@ function renderReelsPage(){
 function reelCard(r){
   const u=users.find(x=>x.id===r.userId);if(!u)return'';
   const liked=(r.likes||[]).includes(CU.id);
-  return `<div class="reel" id="reel-${r.id}">
+  return `<div class="reel" id="reel-${r.id}" onclick="openReelViewer(${r.id})" style="cursor:pointer;">
     ${r.media?`<video src="${r.media}" style="width:100%;height:100%;object-fit:cover;" autoplay muted loop playsinline></video>`:`<div class="reel-ph"><i class="fas fa-film" style="font-size:2.5rem;opacity:.35;"></i><p style="opacity:.6;font-size:.82rem;">${esc(r.description||'Sin descripción')}</p></div>`}
-    <div class="reel-overlay">
+    <div class="reel-overlay" onclick="event.stopPropagation()">
       <div class="r-author-row"><img src="${u.photo||defAv()}" alt="" loading="lazy"><span class="r-uname">${esc(u.username)}</span>
-        <button class="btn btn-primary" style="padding:4px 11px;font-size:.72rem;margin-left:auto;" onclick="toggleFollow(${u.id})">${CU.following.includes(u.id)?'Siguiendo':'Seguir'}</button>
+        <button class="btn btn-primary" style="padding:4px 11px;font-size:.72rem;margin-left:auto;" onclick="event.stopPropagation();toggleFollow(${u.id})">${CU.following.includes(u.id)?'Siguiendo':'Seguir'}</button>
       </div>
       ${r.description?`<p class="r-desc">${esc(r.description)}</p>`:''}
       ${r.music?`<p class="r-music"><i class="fas fa-music"></i> ${esc(r.music)}</p>`:''}
     </div>
-    <div class="r-side">
+    <div class="r-side" onclick="event.stopPropagation()">
       <button class="r-btn" onclick="likeReel(${r.id})" style="${liked?'color:#ef4444;':''}"><i class="fas fa-heart"></i><span>${r.likes?.length||0}</span></button>
-      <button class="r-btn" onclick="toast('💬 Comentarios próximamente','info')"><i class="fas fa-comment"></i><span>${r.comments?.length||0}</span></button>
-      <button class="r-btn" onclick="toast('🔗 Compartido (simulado)','info')"><i class="fas fa-share"></i></button>
+      <button class="r-btn" onclick="openReelComments(${r.id})"><i class="fas fa-comment"></i><span>${r.comments?.length||0}</span></button>
+      <button class="r-btn" onclick="shareReel(${r.id})"><i class="fas fa-share"></i></button>
       ${r.userId===CU.id?`<button class="r-btn" onclick="deleteReel(${r.id})"><i class="fas fa-trash" style="color:var(--danger);"></i></button>`:''}
     </div>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:.25s;" class="reel-play-hint">
+      <div style="background:rgba(0,0,0,.55);border-radius:50%;width:64px;height:64px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-play" style="color:#fff;font-size:1.6rem;margin-left:4px;"></i></div>
+    </div>
   </div>`;
+}
+
+// ─── TIKTOK-STYLE REEL VIEWER ───
+let reelViewerFeed=[];
+let reelViewerIdx=0;
+
+function openReelViewer(reelId){
+  const bl=CU.blocked||[];
+  reelViewerFeed=reels.filter(r=>!bl.includes(r.userId)&&r.media).sort((a,b)=>b.timestamp-a.timestamp);
+  reelViewerIdx=reelViewerFeed.findIndex(r=>r.id===reelId);
+  if(reelViewerIdx<0)reelViewerIdx=0;
+  renderReelViewer();
+  const ov=document.getElementById('reel-viewer-overlay');
+  if(ov){ov.style.display='flex';setTimeout(()=>ov.classList.add('open'),10);}
+}
+
+function closeReelViewer(){
+  const ov=document.getElementById('reel-viewer-overlay');
+  if(!ov)return;
+  ov.classList.remove('open');
+  setTimeout(()=>{ov.style.display='none';const v=ov.querySelector('video');if(v){v.pause();v.src='';}},320);
+}
+
+function renderReelViewer(){
+  const r=reelViewerFeed[reelViewerIdx];
+  if(!r)return;
+  const u=users.find(x=>x.id===r.userId);
+  const liked=(r.likes||[]).includes(CU.id);
+  const prev=reelViewerIdx>0;
+  const next=reelViewerIdx<reelViewerFeed.length-1;
+
+  const ov=document.getElementById('reel-viewer-overlay');
+  if(!ov)return;
+  // Build progress dots
+  const dotOffset=Math.max(0,reelViewerIdx-2);
+  const dotsHtml=reelViewerFeed.slice(dotOffset,reelViewerIdx+3).map((_,i)=>{
+    const absIdx=dotOffset+i;
+    return `<div class="rv-dot ${absIdx===reelViewerIdx?'active':''}"></div>`;
+  }).join('');
+
+  ov.innerHTML=`
+    <div class="rv-container" id="rv-container">
+      <video id="rv-video" src="${r.media}" autoplay loop playsinline></video>
+      <div class="rv-gradient-top"></div>
+      <div class="rv-gradient-bot"></div>
+
+      <!-- Top bar: back + title + mute -->
+      <div class="rv-topbar">
+        <button class="rv-close-btn" onclick="closeReelViewer()"><i class="fas fa-arrow-left"></i></button>
+        <span style="font-family:var(--font-head);font-weight:800;font-size:1rem;color:#fff;letter-spacing:.04em;">Reels</span>
+        <button class="rv-mute-btn" id="rv-mute-btn" onclick="toggleReelMute()"><i class="fas fa-volume-xmark" id="rv-mute-icon"></i></button>
+      </div>
+
+      <!-- Columna izquierda: Ant.(arriba) → dots → Sig.(abajo) -->
+      <!-- Columna derecha: nav (ant/dots/sig) ENCIMA del me gusta -->
+      <div class="rv-actions">
+        ${prev?`<button class="rv-nav-btn" onclick="rvNavigate(-1)" title="Reel anterior"><i class="fas fa-chevron-up"></i></button>
+        <span class="rv-nav-label">Ant.</span>`:''}
+        <div class="rv-dots">${dotsHtml}</div>
+        ${next?`<span class="rv-nav-label">Sig.</span>
+        <button class="rv-nav-btn" onclick="rvNavigate(1)" title="Siguiente reel"><i class="fas fa-chevron-down"></i></button>`:''}
+        <div class="rv-actions-sep"></div>
+        <button class="rv-action-btn ${liked?'rv-liked':''}" onclick="rvLike(${r.id})">
+          <i class="fas fa-heart"></i>
+          <span>${r.likes?.length||0}</span>
+        </button>
+        <button class="rv-action-btn" onclick="openReelComments(${r.id})">
+          <i class="fas fa-comment"></i>
+          <span>${r.comments?.length||0}</span>
+        </button>
+        <button class="rv-action-btn" onclick="shareReel(${r.id})">
+          <i class="fas fa-share-nodes"></i>
+          <span>Compartir</span>
+        </button>
+        ${r.userId===CU.id?`<button class="rv-action-btn" onclick="if(confirm('¿Eliminar reel?')){deleteReel(${r.id});closeReelViewer();}"><i class="fas fa-trash" style="color:#ff6b6b;"></i><span>Eliminar</span></button>`:''}
+      </div>
+
+      <!-- Bottom info: avatar + name + follow + description + music -->
+      <div class="rv-info">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <img src="${u?.photo||defAv()}" style="width:42px;height:42px;border-radius:50%;border:2.5px solid #fff;object-fit:cover;cursor:pointer;flex-shrink:0;" onclick="openProfileModal(${u?.id});closeReelViewer();" alt="">
+          <div style="min-width:0;">
+            <div style="color:#fff;font-weight:800;font-size:.95rem;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" onclick="openProfileModal(${u?.id});closeReelViewer();">${esc(u?.username||'?')}</div>
+            <div style="color:rgba(255,255,255,.55);font-size:.7rem;">${timeAgo(r.timestamp)}</div>
+          </div>
+          <button class="btn btn-primary" style="margin-left:8px;padding:5px 13px;font-size:.74rem;flex-shrink:0;" onclick="event.stopPropagation();toggleFollow(${u?.id})">${CU.following.includes(u?.id||0)?'Siguiendo':'+ Seguir'}</button>
+        </div>
+        ${r.description?`<p style="color:rgba(255,255,255,.9);font-size:.84rem;margin-bottom:5px;line-height:1.4;">${esc(r.description)}</p>`:''}
+        ${r.music?`<p style="color:rgba(255,255,255,.6);font-size:.75rem;display:flex;align-items:center;gap:5px;"><i class="fas fa-music"></i>${esc(r.music)}</p>`:''}
+      </div>
+    </div>`;
+
+  // Setup touch swipe
+  setupReelSwipe();
+
+  // Auto-unmute check
+  const vid=document.getElementById('rv-video');
+  if(vid){
+    vid.muted=window._reelMuted!==false;
+    updateMuteIcon();
+    vid.play().catch(()=>{});
+    // Detectar video horizontal y aplicar object-fit:contain
+    vid.addEventListener('loadedmetadata',()=>{
+      if(vid.videoWidth && vid.videoHeight && vid.videoWidth > vid.videoHeight){
+        vid.classList.add('rv-landscape');
+      } else {
+        vid.classList.remove('rv-landscape');
+      }
+    });
+  }
+}
+
+function toggleReelMute(){
+  const vid=document.getElementById('rv-video');
+  if(!vid)return;
+  vid.muted=!vid.muted;
+  window._reelMuted=vid.muted;
+  updateMuteIcon();
+}
+function updateMuteIcon(){
+  const vid=document.getElementById('rv-video');
+  const icon=document.getElementById('rv-mute-icon');
+  if(!icon||!vid)return;
+  icon.className=vid.muted?'fas fa-volume-xmark':'fas fa-volume-high';
+}
+
+function rvLike(id){
+  const r=reels.find(x=>x.id===id);if(!r)return;
+  r.likes=r.likes||[];
+  if(r.likes.includes(CU.id))r.likes=r.likes.filter(x=>x!==CU.id);
+  else r.likes.push(CU.id);
+  save();
+  renderReelViewer();
+  // also update card in background
+  const el=document.getElementById(`reel-${id}`);
+  if(el){const d=document.createElement('div');d.innerHTML=reelCard(r);el.replaceWith(d.firstChild);}
+}
+
+function rvNavigate(dir){
+  const newIdx=reelViewerIdx+dir;
+  if(newIdx<0||newIdx>=reelViewerFeed.length)return;
+  const vid=document.getElementById('rv-video');
+  if(vid){vid.pause();}
+  reelViewerIdx=newIdx;
+  const cont=document.getElementById('rv-container');
+  if(cont){
+    cont.style.transform=dir>0?'translateY(-30px)':'translateY(30px)';
+    cont.style.opacity='0';
+    setTimeout(()=>{
+      renderReelViewer();
+      const c2=document.getElementById('rv-container');
+      if(c2){c2.style.transition='none';c2.style.transform=dir>0?'translateY(30px)':'translateY(-30px)';c2.style.opacity='0';
+        requestAnimationFrame(()=>{c2.style.transition='transform .28s ease, opacity .28s ease';c2.style.transform='';c2.style.opacity='1';});
+      }
+    },180);
+  }
+}
+
+function setupReelSwipe(){
+  const cont=document.getElementById('rv-container');
+  if(!cont)return;
+  let startY=0,startX=0;
+  cont.addEventListener('touchstart',e=>{startY=e.touches[0].clientY;startX=e.touches[0].clientX;},{passive:true});
+  cont.addEventListener('touchend',e=>{
+    const dy=startY-e.changedTouches[0].clientY;
+    const dx=Math.abs(startX-e.changedTouches[0].clientX);
+    if(Math.abs(dy)>50&&dx<60){rvNavigate(dy>0?1:-1);}
+  },{passive:true});
 }
 function publishReel(){
   const desc=val('rv-desc').trim(),music=val('rv-music').trim();
@@ -1863,6 +2037,58 @@ function publishReel(){
 }
 function likeReel(id){const r=reels.find(x=>x.id===id);if(!r)return;r.likes=r.likes||[];if(r.likes.includes(CU.id))r.likes=r.likes.filter(x=>x!==CU.id);else r.likes.push(CU.id);save();const el=document.getElementById(`reel-${id}`);if(el){const d=document.createElement('div');d.innerHTML=reelCard(r);el.replaceWith(d.firstChild);}}
 function deleteReel(id){if(!confirm('¿Eliminar reel?'))return;reels=reels.filter(r=>r.id!==id);save();renderReelsPage();}
+
+function openReelComments(reelId){
+  const r=reels.find(x=>x.id===reelId);if(!r)return;
+  r.comments=r.comments||[];
+  const mb=document.getElementById('thread-modal-body');if(!mb)return;
+  const u=users.find(x=>x.id===r.userId);
+  mb.innerHTML=`
+    <div style="font-weight:700;margin-bottom:9px;font-family:var(--font-head);">💬 Comentarios del reel de ${esc(u?.username||'?')}</div>
+    <div id="reel-cmts-${reelId}">
+      ${r.comments.length?r.comments.map(c=>{
+        const cu=users.find(x=>x.id===c.userId);
+        const canAct=CU.id===c.userId||CU.isAdmin;
+        return `<div class="cm-item">
+          <div class="cm-main-row">
+            <img src="${cu?.photo||defAv()}" class="cm-av" alt="" loading="lazy">
+            <div class="cm-bubble">
+              <div class="cm-author" onclick="openProfileModal(${cu?.id})">${esc(cu?.username||'?')}</div>
+              <div class="cm-text">${esc(c.text)}</div>
+              <div class="cm-acts">
+                <span class="cm-act" style="cursor:default;">${timeAgo(c.timestamp)}</span>
+                ${canAct?`<button class="cm-act" style="color:var(--danger);" onclick="deleteReelCmt(${reelId},${c.id})">Eliminar</button>`:''}
+              </div>
+            </div>
+          </div>
+        </div>`;
+      }).join(''):`<div class="empty"><i class="fas fa-comment-slash"></i><p>Sin comentarios. ¡Sé el primero!</p></div>`}
+    </div>
+    <div class="cm-input-row" style="margin-top:10px;">
+      <img src="${CU.photo||defAv()}" alt="" loading="lazy">
+      <input type="text" id="reel-cmt-inp-${reelId}" placeholder="Comentar..." onkeypress="if(event.key==='Enter')addReelCmt(${reelId})">
+      <button class="cm-send" onclick="addReelCmt(${reelId})"><i class="fas fa-paper-plane"></i></button>
+    </div>`;
+  openModal('thread-modal');
+}
+function addReelCmt(reelId){
+  const r=reels.find(x=>x.id===reelId);if(!r)return;
+  const inp=document.getElementById(`reel-cmt-inp-${reelId}`);if(!inp||!inp.value.trim())return;
+  r.comments=r.comments||[];
+  r.comments.push({id:Date.now(),userId:CU.id,text:inp.value.trim(),timestamp:Date.now()});
+  inp.value='';save();
+  openReelComments(reelId);
+}
+function deleteReelCmt(reelId,cId){
+  const r=reels.find(x=>x.id===reelId);if(!r)return;
+  r.comments=r.comments.filter(c=>c.id!==cId);save();
+  openReelComments(reelId);
+}
+function shareReel(reelId){
+  const inp=document.getElementById('share-link-input');
+  if(inp)inp.value=`https://serakdep.ms/reel/${reelId}`;
+  openModal('share-modal');
+}
 
 // ═══════════════════════════════════════════
 //  GROUPS
@@ -2034,10 +2260,43 @@ function renderMarketplace(){
     ${products.length?products.map(productCard).join(''):`<div style="grid-column:1/-1;">${empty('fas fa-store','Sin productos aún. ¡Publica el primero!')}</div>`}
   </div>`;
 }
+function openProductDetail(pid){
+  const p=products.find(x=>x.id===pid);if(!p)return;
+  const u=users.find(x=>x.id===p.userId);
+  const mb=document.getElementById('prod-detail-body');
+  if(!mb)return;
+  mb.innerHTML=`
+    ${p.image?`<div style="width:100%;max-height:420px;overflow:hidden;border-radius:var(--r-lg) var(--r-lg) 0 0;background:#000;display:flex;align-items:center;justify-content:center;">
+      <img src="${p.image}" style="max-width:100%;max-height:420px;object-fit:contain;display:block;" alt="">
+    </div>`:''}
+    <div style="padding:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div>
+          <div class="mkt-price" style="font-size:1.35rem;">$${esc(p.price)}</div>
+          <h3 style="font-weight:800;font-size:1.05rem;margin-top:3px;">${esc(p.title)}</h3>
+        </div>
+        ${p.sold?`<span class="sold-badge" style="font-size:.8rem;">Vendido</span>`:p.category?`<span class="tag tag-gray">${esc(p.category)}</span>`:''}
+      </div>
+      ${p.description?`<p style="font-size:.88rem;color:var(--text2);margin-bottom:14px;line-height:1.5;">${esc(p.description)}</p>`:''}
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:14px;cursor:pointer;padding:10px;background:var(--input-bg);border-radius:var(--r-md);" onclick="openProfileModal(${u?.id});closeModal('prod-detail-modal');">
+        <img src="${u?.photo||defAv()}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" alt="">
+        <div>
+          <div style="font-weight:700;font-size:.88rem;">${esc(u?.username||'')}</div>
+          <div style="font-size:.72rem;color:var(--text2);">Ver perfil →</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${p.userId!==CU.id&&!p.sold?`<button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="interestedInProduct(${p.id});closeModal('prod-detail-modal');"><i class="fas fa-heart"></i> Me interesa</button>
+        <button class="btn btn-ghost" style="padding:8px 14px;" onclick="navigate('messages');closeModal('prod-detail-modal');setTimeout(()=>openChat(${p.userId}),300)"><i class="fas fa-comment"></i> Contactar</button>`:''}
+        ${p.userId===CU.id&&!p.sold?`<button class="btn btn-ghost" style="flex:1;justify-content:center;" onclick="markSold(${p.id});closeModal('prod-detail-modal');">Marcar vendido</button>`:''}
+      </div>
+    </div>`;
+  openModal('prod-detail-modal');
+}
 function productCard(p){
   const u=users.find(x=>x.id===p.userId);
   return `<div class="mkt-card" id="mkt-${p.id}">
-    ${p.image?`<img src="${p.image}" class="mkt-img" alt="" onclick="openLB('${p.image.substring(0,80)}')" style="cursor:pointer;" loading="lazy">`:'<div style="width:100%;height:130px;background:var(--input-bg);display:flex;align-items:center;justify-content:center;"><i class="fas fa-image" style="font-size:2rem;opacity:.3;"></i></div>'}
+    ${p.image?`<div style="position:relative;width:100%;height:180px;overflow:hidden;cursor:pointer;" onclick="openProductDetail(${p.id})" class="mkt-img-wrap"><img src="${p.image}" class="mkt-img" alt="" loading="lazy" style="pointer-events:none;width:100%;height:100%;object-fit:cover;"></div>`:`<div style="width:100%;height:130px;background:var(--input-bg);display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="openProductDetail(${p.id})"><i class="fas fa-image" style="font-size:2rem;opacity:.3;"></i></div>`}
     <div class="mkt-body">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;">
         <div class="mkt-price">$${esc(p.price)}</div>
@@ -2051,7 +2310,7 @@ function productCard(p){
       </div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;">
         ${p.userId!==CU.id&&!p.sold?`<button class="btn btn-primary" style="flex:1;justify-content:center;padding:6px 10px;font-size:.75rem;" onclick="interestedInProduct(${p.id})"><i class="fas fa-heart"></i> Me interesa</button>
-        <button class="btn btn-ghost" style="padding:6px 10px;font-size:.75rem;" onclick="openChat(${p.userId})"><i class="fas fa-comment"></i> Contactar</button>`:''}
+        <button class="btn btn-ghost" style="padding:6px 10px;font-size:.75rem;" onclick="navigate('messages');setTimeout(()=>openChat(${p.userId}),300)"><i class="fas fa-comment"></i> Contactar</button>`:''}
         ${p.userId===CU.id&&!p.sold?`<button class="btn btn-ghost" style="flex:1;justify-content:center;font-size:.75rem;" onclick="markSold(${p.id})">Marcar vendido</button>`:''}
       </div>
     </div>
@@ -2151,7 +2410,7 @@ function publishEvent(){
   save();closeModal('event-create-modal');renderEventsPage();toast('Evento creado 🎉','success');
 }
 function toggleAttend(id){const e=events.find(x=>x.id===id);if(!e)return;if((e.attendees||[]).includes(CU.id))e.attendees=e.attendees.filter(x=>x!==CU.id);else{e.attendees=e.attendees||[];e.attendees.push(CU.id);}save();renderEventsPage();}
-function deleteEvent(id){if(!confirm('¿Eliminar evento?'))return;events=events.filter(x=>x!==id);save();renderEventsPage();}
+function deleteEvent(id){if(!confirm('¿Eliminar evento?'))return;events=events.filter(x=>x.id!==id);save();renderEventsPage();}
 function toggleEventReminder(id){
   CU.eventReminders = CU.eventReminders || [];
   if(CU.eventReminders.includes(id)){
@@ -2312,7 +2571,7 @@ function renderChatArea(conv){
     const rxnSummary=Object.entries(rxnMap).map(([e,uids])=>`<span class="brxn">${e} ${uids.length}</span>`).join('');
     const quoteH=m.replyTo?(()=>{const orig=conv.messages.find(x=>x.timestamp===m.replyTo);return orig?`<div class="reply-quote" onclick="document.getElementById('bbl-${orig.timestamp}')?.scrollIntoView({behavior:'smooth'})"><b>${orig.from===CU.id?'Tú':users.find(u=>u.id===orig.from)?.username||'?'}</b>: ${esc((orig.text||'[media]').substring(0,60))}</div>`:'';})():'';
     const rxnBar=`<div class="msg-rxn-bar">
-      ${['❤️','👍','😂','😮','😢','🔥'].map(e=>`<button class="msg-rxn-btn" onclick="addMsgRxn(event,${conv.participants[0]},${m.timestamp},'${e}')">${e}</button>`).join('')}
+      ${['❤️','👍','😂','😮','😢','🔥'].map(e=>`<button class="msg-rxn-btn" onclick="addMsgRxn(event,${conv.participants.find(id=>id!==CU.id)||0},${m.timestamp},'${e}')">${e}</button>`).join('')}
       <button class="msg-rxn-btn" title="Responder" onclick="setMsgReply(${conv.participants.find(id=>id!==CU.id)||0},${m.timestamp},'${esc((m.text||'[media]').substring(0,50))}','${isMine?'Tú':esc(users.find(u=>u.id===m.from)?.username||'?')}')">↩️</button>
       ${isMine?`<button class="msg-rxn-btn" title="Eliminar" onclick="deleteMsgBubble(${conv.participants.find(id=>id!==CU.id)||0},${m.timestamp})">🗑️</button>`:''}
     </div>`;
@@ -2805,7 +3064,8 @@ function updateBadges(){
   
   const rdNb=document.getElementById('rd-notif-badge');if(rdNb){rdNb.textContent=unread;rdNb.style.display=unread>0?'block':'none';}
 }
-document.getElementById('notif-btn').addEventListener('click',()=>{
+const _notifBtn=document.getElementById('notif-btn');
+if(_notifBtn)_notifBtn.addEventListener('click',()=>{
   // Sync CU.notifications from notifs array
   CU.notifications = notifs.filter(n=>n.userId===CU.id).sort((a,b)=>b.timestamp-a.timestamp);
   nFilter='all';
@@ -2900,7 +3160,23 @@ function toast(msg,type='info'){
   t.innerHTML=(icons[type]||'')+` ${esc(msg)}`;c.appendChild(t);
   setTimeout(()=>{t.style.animation='tIn .28s ease reverse';setTimeout(()=>t.remove(),300);},3500);
 }
-function openLB(src){document.getElementById('lb-img').src=src;openModal('lightbox-modal');}
+function openLB(src){
+  const el=document.getElementById('lb-img');
+  if(!el)return;
+  el.src=src;
+  openModal('lightbox-modal');
+}
+// Helper: store full src in a data attribute and open lightbox from it
+function openLBFull(elOrId){
+  let src='';
+  if(typeof elOrId==='string'){
+    const el=document.getElementById(elOrId);
+    src=el?el.dataset.fullsrc||el.src:'';
+  }else if(elOrId && elOrId.dataset){
+    src=elOrId.dataset.fullsrc||elOrId.src;
+  }
+  if(src)openLB(src);
+}
 function openModal(id){document.getElementById(id)?.classList.add('open');}
 function closeModal(id){document.getElementById(id)?.classList.remove('open');}
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
@@ -2914,19 +3190,22 @@ document.addEventListener('keydown',e=>{
 //  SEARCH (inline)
 // ═══════════════════════════════════════════
 let _searchTimer=null;
-document.getElementById('h-search').addEventListener('input',function(){
-  const q=this.value.trim();
-  clearTimeout(_searchTimer);
-  if(!q){if(cView==='public'||cView==='search')renderFeed();return;}
-  _searchTimer=setTimeout(()=>globalSearch(q),350);
-});
-document.getElementById('h-search').addEventListener('focus',function(){
-  if(this.value.trim()===''){openModal('search-modal');setTimeout(()=>document.getElementById('adv-search-q')?.focus(),80);}
-});
-document.getElementById('h-search').addEventListener('keydown',e=>{
-  if(e.key==='Enter'){e.preventDefault();const q=e.target.value.trim();if(q)globalSearch(q);}
-  if(e.key==='Escape'){e.target.value='';if(cView==='public'||cView==='search')renderFeed();}
-});
+const _hSearch=document.getElementById('h-search');
+if(_hSearch){
+  _hSearch.addEventListener('input',function(){
+    const q=this.value.trim();
+    clearTimeout(_searchTimer);
+    if(!q){if(cView==='public'||cView==='search')renderFeed();return;}
+    _searchTimer=setTimeout(()=>globalSearch(q),350);
+  });
+  _hSearch.addEventListener('focus',function(){
+    if(this.value.trim()===''){openModal('search-modal');setTimeout(()=>document.getElementById('adv-search-q')?.focus(),80);}
+  });
+  _hSearch.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();const q=e.target.value.trim();if(q)globalSearch(q);}
+    if(e.key==='Escape'){e.target.value='';if(cView==='public'||cView==='search')renderFeed();}
+  });
+}
 
 // ═══════════════════════════════════════════
 //  MISSING FUNCTIONS
@@ -2962,10 +3241,12 @@ function initNotifPolling(){
 }
 function initChatPolling(){
   if(chatPollInterval)clearInterval(chatPollInterval);
+  let lastChatUnread=messages.filter(m=>m.participants.includes(CU.id)).reduce((a,m)=>a+(m.messages.filter(x=>x.from!==CU.id&&!x.seen).length),0);
   chatPollInterval=setInterval(()=>{
     if(!CU)return;
     const unread=messages.filter(m=>m.participants.includes(CU.id)).reduce((a,m)=>a+(m.messages.filter(x=>x.from!==CU.id&&!x.seen).length),0);
-    if(unread>0){playChatSound();}
+    if(unread>lastChatUnread){playChatSound();}
+    lastChatUnread=unread;
     updateBadges();
   },5000);
 }
@@ -3143,6 +3424,22 @@ function setRatingVal(v){
     s.style.color=i<v?'var(--orange)':'var(--border)';
   });
 }
+function openRateSellerModal(sellerId, productId){
+  pendingRateSellerId=sellerId;
+  pendingRateProductId=productId||null;
+  selectedRatingValue=5;
+  // Reset stars
+  document.querySelectorAll('.star-btn').forEach((s,i)=>{
+    s.className='fas fa-star star-btn';
+    s.style.color=i<5?'var(--orange)':'var(--border)';
+  });
+  const comment=document.getElementById('rate-seller-comment');
+  if(comment)comment.value='';
+  const prompt=document.getElementById('rate-seller-prompt');
+  const u=users.find(x=>x.id===sellerId);
+  if(prompt)prompt.textContent=`Califica tu experiencia con ${u?.username||'el vendedor'}:`;
+  openModal('rate-seller-modal');
+}
 function submitSellerRating(){
   const sid=pendingRateSellerId;const pid=pendingRateProductId;
   if(!sid)return;
@@ -3316,12 +3613,22 @@ function renderNotifsFiltered(){
   const filtered=nFilter==='all'?myN:myN.filter(n=>n.type===nFilter);
   const nHtml=filtered.length?filtered.map(n=>{
     const from=users.find(u=>u.id===n.fromId);
-    const ic={message:'fas fa-comment',follow:'fas fa-user-plus',reaction:'fas fa-heart',comment:'fas fa-comments',mention:'fas fa-at',birthday:'fas fa-birthday-cake',interested:'fas fa-heart',seller_rate:'fas fa-star'}[n.type]||'fas fa-bell';
-    const txt={message:`${esc(from?.username||'?')} te envió un mensaje`,follow:`${esc(from?.username||'?')} empezó a seguirte`,reaction:`${esc(from?.username||'?')} reaccionó a tu post`,comment:`${esc(from?.username||'?')} comentó tu post`,mention:`${esc(from?.username||'?')} te mencionó`,birthday:'¡Es tu cumpleaños! 🎂',interested:`${esc(from?.username||'?')} tiene interés en tu producto`,seller_rate:`${esc(from?.username||'?')} quiere calificarte`}[n.type]||n.type;
+    const ic={message:'fas fa-comment',follow:'fas fa-user-plus',reaction:'fas fa-heart',comment:'fas fa-comments',mention:'fas fa-at',birthday:'fas fa-birthday-cake',interested:'fas fa-heart',seller_rate:'fas fa-star',event_alert:'fas fa-calendar-check',badge:'fas fa-medal',group_request:'fas fa-user-clock',group_accepted:'fas fa-check-circle',cmt_like:'fas fa-heart',cmt_reply:'fas fa-reply',repost:'fas fa-retweet'}[n.type]||'fas fa-bell';
+    const txt={message:`${esc(from?.username||'?')} te envió un mensaje`,follow:`${esc(from?.username||'?')} empezó a seguirte`,reaction:`${esc(from?.username||'?')} reaccionó a tu post`,comment:`${esc(from?.username||'?')} comentó tu post`,mention:`${esc(from?.username||'?')} te mencionó`,birthday:'¡Es tu cumpleaños! 🎂',interested:`${esc(from?.username||'?')} tiene interés en tu producto`,seller_rate:`${esc(from?.username||'?')} quiere calificarte`,event_alert:`Recordatorio: "${n.title||'evento'}" comienza pronto`,badge:`🏅 Insignia desbloqueada: ${BADGES_DEF.find(b=>b.id===n.badgeId)?.label||n.badgeId||'nueva insignia'}`,group_request:`${esc(from?.username||'?')} solicita unirse a tu grupo`,group_accepted:`Tu solicitud para unirte al grupo fue aceptada`,cmt_like:`${esc(from?.username||'?')} le gustó tu comentario`,cmt_reply:`${esc(from?.username||'?')} respondió a tu comentario`,repost:`${esc(from?.username||'?')} reposteó tu publicación`}[n.type]||n.type;
+    const actionBtn = n.type==='seller_rate'
+      ? `<button class="btn btn-primary" style="padding:4px 10px;font-size:.72rem;flex-shrink:0;" onclick="openRateSellerModal(${n.sellerId||n.fromId},${n.prodId||'null'});markNotifRead(${n.id});closeModal('notif-modal')">Calificar</button>`
+      : n.type==='message'
+      ? `<button class="btn btn-ghost" style="padding:4px 10px;font-size:.72rem;flex-shrink:0;" onclick="navigate('messages');setTimeout(()=>openChat(${n.fromId}),300);closeModal('notif-modal')">Ver</button>`
+      : n.type==='follow'
+      ? `<button class="btn btn-ghost" style="padding:4px 10px;font-size:.72rem;flex-shrink:0;" onclick="openProfileModal(${n.fromId})">Ver perfil</button>`
+      : n.type==='group_request'&&n.gid
+      ? `<button class="btn btn-primary" style="padding:4px 10px;font-size:.72rem;flex-shrink:0;" onclick="acceptReq(${n.gid},${n.fromId});markNotifRead(${n.id})">Aceptar</button>`
+      : '';
     return `<div class="notif-item ${n.read?'':'unread'}" onclick="markNotifRead(${n.id})">
       <span class="nicon"><i class="${ic}"></i></span>
       <div style="flex:1;"><div style="font-size:.84rem;">${txt}</div><div style="font-size:.73rem;color:var(--text2);">${timeAgo(n.timestamp)}</div></div>
-      ${!n.read?`<span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0;"></span>`:''}
+      ${actionBtn}
+      ${!n.read&&!actionBtn?`<span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0;"></span>`:''}
     </div>`;}).join(''):`<div class="empty"><i class="fas fa-bell-slash"></i><p>Sin notificaciones${nFilter!=='all'?' de este tipo':''}</p></div>`;
 
   const types=['all','message','follow','reaction','comment'];
@@ -3334,10 +3641,18 @@ function renderNotifsFiltered(){
 function setNFilter(t){nFilter=t;renderNotifsFiltered();}
 function markNotifRead(id){
   const n=(CU.notifications||[]).find(x=>x.id===id);
-  if(n)n.read=true;save();renderNotifsFiltered();updateNotifBadge();
+  if(n)n.read=true;
+  const gn=notifs.find(x=>x.id===id);
+  if(gn)gn.read=true;
+  save();renderNotifsFiltered();updateNotifBadge();
 }
 function markAllNotifsRead(){
-  (CU.notifications||[]).forEach(n=>n.read=true);save();renderNotifsFiltered();updateNotifBadge();
+  (CU.notifications||[]).forEach(n=>{
+    n.read=true;
+    const gn=notifs.find(x=>x.id===n.id);
+    if(gn)gn.read=true;
+  });
+  save();renderNotifsFiltered();updateNotifBadge();
   toast('Todas las notificaciones marcadas como leídas','success');
 }
 function updateNotifBadge(){
@@ -3399,7 +3714,7 @@ function shareEventToFeed(id){
   const e=events.find(x=>x.id===id);if(!e)return;
   const d=new Date(e.date);
   const content=`📅 Evento: ${e.title}\n${e.description?e.description+'\n':''}🗓️ ${d.toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})}${e.location?' | 📍 '+e.location:''}`;
-  const p={id:ids.npost++,userId:CU.id,content,timestamp:Date.now(),reactions:{},comments:[],savedBy:[],privacy:'public',reposts:[],groupId:null,mediaType:null,media:null};
+  const p={id:ids.np++,userId:CU.id,content,timestamp:Date.now(),reactions:{},comments:[],savedBy:[],privacy:'public',reposts:[],groupId:null,mediaType:null,media:null};
   posts.unshift(p);save();navigate('public');toast('Evento compartido en el foro ✅','success');logActivity('post','Compartió un evento');
 }
 
@@ -3951,7 +4266,7 @@ function openWatchPlayer(id, source){
       <hr class="div">
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="btn btn-ghost" onclick="likeWatchVideo(${id},'${source}')" style="gap:6px;${liked?'color:var(--danger);':''}"><i class="fas fa-heart"></i> ${(v.likes||[]).length} Me gusta</button>
-        <button class="btn btn-ghost" onclick="shareWatchVideo(${id})"><i class="fas fa-share"></i> Compartir</button>
+        <button class="btn btn-ghost" onclick="shareWatchVideo(${id},'${source}')"><i class="fas fa-share"></i> Compartir</button>
         <button class="btn btn-ghost" onclick="openClipModal(${id},'${source}')"><i class="fas fa-scissors"></i> Crear clip</button>
       </div>
     </div>`;
@@ -3971,7 +4286,11 @@ function likeWatchVideo(id, source){
   openWatchPlayer(id,source);
 }
 
-function shareWatchVideo(id){ toast('🔗 Enlace copiado (simulado)','success'); }
+function shareWatchVideo(id,source){
+  const inp=document.getElementById('share-link-input');
+  if(inp)inp.value=`https://serakdep.ms/watch/${source||'reel'}/${id}`;
+  openModal('share-modal');
+}
 
 function openClipModal(id,source){
   document.getElementById('clip-modal-body').innerHTML=`
@@ -4122,21 +4441,6 @@ function createGroupChat(){
 // ═══════════════════════════════════════════
 //  TRENDING HASHTAGS (sidebar)
 // ═══════════════════════════════════════════
-function renderTrendingHashtags(){
-  const c=document.getElementById('trending-hashtags');if(!c)return;
-  const tagMap={};
-  posts.forEach(p=>{
-    const tags=p.content.match(/#[a-zA-ZÀ-ÿ0-9_]+/g)||[];
-    tags.forEach(t=>{tagMap[t]=(tagMap[t]||0)+1;});
-  });
-  const sorted=Object.entries(tagMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  c.innerHTML=sorted.length?sorted.map(([tag,count])=>`
-    <div class="list-row" onclick="searchTag('${esc(tag)}')">
-      <span class="gicon" style="font-size:.8rem;">#</span>
-      <div><div class="lname">${esc(tag)}</div><div class="lsub">${count} post${count!==1?'s':''}</div></div>
-    </div>`).join(''):`<p style="padding:8px 11px;font-size:.8rem;color:var(--text2);">Sin hashtags aún</p>`;
-}
-
 // Patch renderSidebar to include status and trending
 const _origRenderSidebar=renderSidebar;
 renderSidebar=function(){
@@ -4251,19 +4555,11 @@ function sendGroupChatMsg(gcId){
 // ═══════════════════════════════════════════
 //  PATCH: Add status button to sidebar
 // ═══════════════════════════════════════════
-// Add trending hashtags section if not present
+// Update trending hashtags when groups bar renders
 const _origRenderGroupsBar=renderGroupsBar;
 renderGroupsBar=function(){
   _origRenderGroupsBar();
-  // Add trending section to sidebar if card exists
-  const sidebar=document.getElementById('sidebar');
-  if(sidebar&&!document.getElementById('trending-card')){
-    const tc=document.createElement('div');
-    tc.className='card';tc.id='trending-card';
-    tc.innerHTML=`<div class="card-h"><h4><i class="fas fa-fire" style="color:var(--danger);"></i> Tendencias</h4></div><div id="trending-hashtags"></div>`;
-    sidebar.appendChild(tc);
-    renderTrendingHashtags();
-  }
+  renderTrendingHashtags();
 };
 
 // ═══════════════════════════════════════════

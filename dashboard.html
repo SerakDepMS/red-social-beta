@@ -210,8 +210,8 @@
         <button class="tab-pill" id="st-vid" onclick="storyTab('video')"><i class="fas fa-video"></i> Vídeo</button>
         <button class="tab-pill" id="st-txt" onclick="storyTab('text')"><i class="fas fa-font"></i> Texto</button>
       </div>
-      <div id="sp-image"><input type="file" id="si-file" accept="image/*" style="margin-bottom:7px;"><div id="si-prev" style="display:none;text-align:center;"><img id="si-el" style="max-height:190px;border-radius:var(--r-md);" src=""></div></div>
-      <div id="sp-video" style="display:none;"><input type="file" id="sv-file" accept="video/*" style="margin-bottom:7px;"></div>
+      <div id="sp-image"><input type="file" id="si-file" accept="image/*,video/*,audio/*" style="margin-bottom:7px;"><div id="si-prev" style="display:none;text-align:center;"><img id="si-el" style="max-height:190px;border-radius:var(--r-md);" src=""></div></div>
+      <div id="sp-video" style="display:none;"><input type="file" id="sv-file" accept="video/*,audio/*" style="margin-bottom:7px;"></div>
       <div id="sp-text" style="display:none;">
         <textarea id="st-text" placeholder="Escribe algo..." style="min-height:90px;resize:none;"></textarea>
         <div style="display:flex;align-items:center;gap:9px;margin-top:7px;">
@@ -477,8 +477,8 @@
 
 <!-- KEYBOARD SHORTCUTS MODAL -->
 <div class="modal" id="kbd-modal">
-  <div class="modal-box" style="max-width:420px;">
-    <div class="modal-hd"><h3><i class="fas fa-keyboard"></i> Atajos de teclado</h3><button class="btn-icon" onclick="closeModal('kbd-modal')"><i class="fas fa-times"></i></button></div>
+  <div class="mbox" style="max-width:420px;">
+    <div class="mhead"><h3><i class="fas fa-keyboard"></i> Atajos de teclado</h3><button class="btn-icon" onclick="closeModal('kbd-modal')"><i class="fas fa-times"></i></button></div>
     <div style="padding:14px;">
       <table class="kbd-table">
         <tr><td>Buscar</td><td><kbd>Ctrl</kbd>+<kbd>K</kbd></td></tr>
@@ -496,8 +496,8 @@
 
 <!-- SOCIAL LINKS MODAL -->
 <div class="modal" id="social-links-modal">
-  <div class="modal-box" style="max-width:400px;">
-    <div class="modal-hd"><h3><i class="fas fa-share-alt"></i> Redes sociales</h3><button class="btn-icon" onclick="closeModal('social-links-modal')"><i class="fas fa-times"></i></button></div>
+  <div class="mbox" style="max-width:400px;">
+    <div class="mhead"><h3><i class="fas fa-share-alt"></i> Redes sociales</h3><button class="btn-icon" onclick="closeModal('social-links-modal')"><i class="fas fa-times"></i></button></div>
     <div style="padding:14px;display:flex;flex-direction:column;gap:10px;">
       <div><label style="font-size:.8rem;color:var(--text2);display:block;margin-bottom:3px;"><i class="fab fa-instagram"></i> Instagram (usuario)</label><input type="text" id="sl-ig" placeholder="tu_usuario"></div>
       <div><label style="font-size:.8rem;color:var(--text2);display:block;margin-bottom:3px;"><i class="fab fa-discord"></i> Discord (usuario#0000)</label><input type="text" id="sl-dc" placeholder="usuario#1234"></div>
@@ -510,8 +510,8 @@
 
 <!-- WHO LIKED MODAL -->
 <div class="modal" id="liked-modal">
-  <div class="modal-box" style="max-width:380px;">
-    <div class="modal-hd"><h3><i class="fas fa-heart" style="color:var(--danger);"></i> Reacciones</h3><button class="btn-icon" onclick="closeModal('liked-modal')"><i class="fas fa-times"></i></button></div>
+  <div class="mbox" style="max-width:380px;">
+    <div class="mhead"><h3><i class="fas fa-heart" style="color:var(--danger);"></i> Reacciones</h3><button class="btn-icon" onclick="closeModal('liked-modal')"><i class="fas fa-times"></i></button></div>
     <div style="padding:10px;" id="modal-liked-list"></div>
   </div>
 </div>
@@ -597,7 +597,17 @@
   </div>
 </div>
 
+<!-- PRODUCT DETAIL MODAL -->
+<div class="modal" id="prod-detail-modal">
+  <div class="mbox" style="max-width:540px;padding:0;overflow:hidden;">
+    <div class="mhead" style="padding:13px 16px;"><h3><i class="fas fa-store" style="color:var(--orange);"></i> Producto</h3><button class="btn-icon" onclick="closeModal('prod-detail-modal')"><i class="fas fa-times"></i></button></div>
+    <div id="prod-detail-body" style="max-height:80vh;overflow-y:auto;"></div>
+  </div>
+</div>
 
+<!-- TIKTOK REEL VIEWER -->
+<div id="reel-viewer-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#000;flex-direction:column;align-items:stretch;justify-content:stretch;" onclick="if(event.target===this)closeReelViewer();">
+</div>
 
 <script src="script.js" defer></script>
 </body>
