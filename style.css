@@ -568,7 +568,7 @@ body.noscroll {
 .sets-nav .sni:hover{background:var(--hover);}
 .sets-nav .sni.active{background:var(--green-l);color:var(--green);font-weight:700;}
 .sets-panel{background:var(--card);border-radius:var(--r-lg);padding:22px;box-shadow:var(--sh1);}
-.sets-panel h3{font-family:var(--font-head);font-weight:800;font-size:1rem;margin-bottom:18px;}
+.sets-panel h3{font-family:var(--font-head);font-weight:800;font-size:1rem;margin-bottom:18px;margin-top:0;}
 .sets-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
 .sets-row:last-child{border-bottom:none;}
 .sr-label{font-weight:600;font-size:.87rem;}
@@ -757,11 +757,10 @@ body.noscroll {
 
   body.sidebar-pinned .left-sidebar {
     position: sticky !important;
-    top: var(--hh) !important;
-    padding-top: 18px !important;
+    top: calc(var(--hh) + 18px) !important;
     left: auto !important;
     width: var(--sidebar) !important;
-    height: calc(100vh - var(--hh) - 36px) !important;
+    height: calc(100vh - var(--hh) - 36px - 30px) !important;
     overflow-y: auto !important;
     box-shadow: none !important;
     transition: none !important;
@@ -769,9 +768,17 @@ body.noscroll {
     background: transparent !important;
     margin: 0 !important;
     padding: 0 !important;
-    padding-top: 18px !important;
+    padding-top: 30px !important;
     border-radius: 0 !important;
     align-self: start !important;
+  }
+  
+  /* Compensar el padding interno de .sets-panel en Configuración */
+  body.sidebar-pinned .sets-panel {
+    padding-top: 0;
+  }
+  body.sidebar-pinned .sets-panel > *:first-child {
+    margin-top: 22px; /* mismo valor que el padding original para alinear con el borde de la tarjeta */
   }
   
   /* Encabezado del menú izquierdo se muestra en modo cajón y se oculta al fijar. */
