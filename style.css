@@ -757,7 +757,8 @@ body.noscroll {
 
   body.sidebar-pinned .left-sidebar {
     position: sticky !important;
-    top: calc(var(--hh) + 18px) !important;
+    top: var(--hh) !important;
+    padding-top: 18px !important;
     left: auto !important;
     width: var(--sidebar) !important;
     height: calc(100vh - var(--hh) - 36px) !important;
@@ -768,6 +769,7 @@ body.noscroll {
     background: transparent !important;
     margin: 0 !important;
     padding: 0 !important;
+    padding-top: 18px !important;
     border-radius: 0 !important;
     align-self: start !important;
   }
