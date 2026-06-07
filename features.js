@@ -1552,7 +1552,7 @@ window.exportMyData = function() {
       <h3 style="font-family:var(--font-head);font-weight:800;margin-bottom:16px;"><i class="fas fa-compass" style="color:var(--blue);margin-right:7px;"></i>Explorar</h3>
 
       <div style="margin-bottom:20px;">
-        <div style="font-weight:700;font-family:var(--font-head);font-size:.9rem;margin-bottom:10px;">🔥 Trending esta semana</div>
+        <div style="font-weight:700;font-family:var(--font-head);font-size:.9rem;margin-bottom:10px;">Trending esta semana</div>
         <div style="display:flex;flex-wrap:wrap;gap:7px;">
           ${trending.length ? trending.map(([tag, count]) =>
             `<span class="tag tag-green" style="cursor:pointer;font-size:.8rem;padding:5px 12px;" onclick="navigate('public');setTimeout(()=>{const inp=document.getElementById('h-search');if(inp){inp.value='${esc(tag)}';inp.dispatchEvent(new Event('input'));}},300);">${tag} <span style="opacity:.7;">${count}</span></span>`
@@ -1561,7 +1561,7 @@ window.exportMyData = function() {
       </div>
 
       <div style="margin-bottom:20px;">
-        <div style="font-weight:700;font-family:var(--font-head);font-size:.9rem;margin-bottom:10px;">⭐ Posts más populares de la semana</div>
+        <div style="font-weight:700;font-family:var(--font-head);font-size:.9rem;margin-bottom:10px;">Posts más populares de la semana</div>
         ${weekPosts.length ? weekPosts.map(p => {
           const author = (window.users||[]).find(u=>u.id===p.userId);
           return `<div class="card" style="padding:12px 14px;margin-bottom:8px;cursor:pointer;" onclick="openProfileModal(${p.userId})">
@@ -1576,7 +1576,7 @@ window.exportMyData = function() {
       </div>
 
       <div>
-        <div style="font-weight:700;font-family:var(--font-head);font-size:.9rem;margin-bottom:10px;">👤 Personas que quizás conozcas</div>
+        <div style="font-weight:700;font-family:var(--font-head);font-size:.9rem;margin-bottom:10px;">Personas que quizás conozcas</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;">
           ${suggested.map(u => `
             <div class="card" style="padding:14px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:7px;">

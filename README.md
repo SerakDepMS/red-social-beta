@@ -145,19 +145,6 @@
 
 ---
 
-## 🚀 Cómo Usar
-
-No requiere instalación ni servidor. Simplemente:
-
-1. Clona o descarga el repositorio
-2. Abre `index.html` en cualquier navegador moderno
-3. Regístrate con un nombre de usuario y contraseña
-4. ¡Explora la red social!
-
-O accede directamente a la demo en vivo: **[https://serakdepms.github.io/red-social-beta/](https://serakdepms.github.io/red-social-beta/)**
-
----
-
 ## 📝 Notas
 
 - Todos los datos son locales (guardados en el `localStorage` del navegador). No hay backend ni base de datos externa.
